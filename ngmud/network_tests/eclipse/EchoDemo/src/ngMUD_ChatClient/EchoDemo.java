@@ -5,10 +5,7 @@
 
 package ngMUD_ChatClient;
 
-/**
- *
- * @author shiva
- */
+
 import java.applet.Applet;
 import java.net.*;
 import java.io.*;
@@ -16,6 +13,11 @@ import java.awt.*;
 import java.awt.event.*;
 
 public class EchoDemo extends Applet implements Runnable, ActionListener  {
+  /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
   TextArea    incoming;  // Zum Anzeigen von Text
   TextField   outgoing;  // Zur Texteingabe
   Thread      t;         // Thread, zum Textempfangen
