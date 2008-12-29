@@ -10,6 +10,25 @@ public class CSocket {
 		Inited=false;
 	}
 	
+	public boolean IsInited()
+	{
+		return Inited;
+	}
+	
+	public int DataAvailable()
+	{
+		if(!Inited)
+		{	return -1;	}
+		try
+		{
+			return BufIn.available();
+		}
+		catch(IOException e)
+		{
+			return -1;
+		}
+	}
+	
 	boolean Init(Socket Sock)
 	{
 		if(!Sock.isConnected())
@@ -72,7 +91,23 @@ public class CSocket {
 		{
 			return false;
 		}
+		Inited=true;
 		return true;
+	}
+	
+	public void UnInit()
+	{
+		try {
+			StreamIn.close();
+			StreamOut.close();
+			BufIn.close();
+			BufOut.close();
+			Sock.close();
+			Inited=false;
+		}
+		catch (IOException e)
+		{
+		}
 	}
 	
 	protected boolean Inited;

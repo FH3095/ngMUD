@@ -4,12 +4,13 @@ import java.io.IOException;
 import java.net.*;
 
 
-public class CListenSocket {
-	CListenSocket()
+public class CListenSocket{
+	public CListenSocket(CServer Server)
 	{
+		this.Server=Server;
 	}
 	
-	boolean Init(int Port,SocketAddress Address)
+	public boolean Init(int Port,SocketAddress Address)
 	{
 		try
 		{
@@ -24,7 +25,7 @@ public class CListenSocket {
 		try
 		{
 			Sock.setReceiveBufferSize(65500);
-			Sock.setSoTimeout(1);
+			Sock.setSoTimeout(0);
 		}
 		catch(SocketException e)
 		{
@@ -40,4 +41,5 @@ public class CListenSocket {
 	}
 
 	protected ServerSocket Sock;
+	protected CServer Server;
 }
