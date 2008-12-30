@@ -29,7 +29,7 @@ public class CSocket {
 		}
 	}
 	
-	boolean Init(Socket Sock)
+	public boolean Init(Socket Sock)
 	{
 		if(!Sock.isConnected())
 		{
@@ -40,7 +40,7 @@ public class CSocket {
 		return InitStreams();
 	}
 	
-	boolean Init(InetAddress Address,int Port,int Timeout,boolean NoDelay)
+	public boolean Init(InetAddress Address,int Port,int Timeout,boolean NoDelay)
 	{
 		try
 		{
@@ -56,7 +56,7 @@ public class CSocket {
 		return InitStreams();
 	}
 	
-	boolean Init(InetAddress Address,int Port,InetAddress LocalAddress,int LocalPort,
+	public boolean Init(InetAddress Address,int Port,InetAddress LocalAddress,int LocalPort,
 				 int Timeout,boolean NoDelay)
 	{
 		try
