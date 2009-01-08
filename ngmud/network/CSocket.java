@@ -2,20 +2,22 @@ package ngmud.network;
 
 import java.net.*;
 import java.io.*;
+import ngmud.ngMUDException;
 
 
 public class CSocket {
 	public CSocket()
 	{
+		Sock=null;
 		Inited=false;
 	}
 	
-	public boolean IsInited()
+	public synchronized boolean IsInited()
 	{
 		return Inited;
 	}
 	
-	public int DataAvailable()
+	public synchronized int DataAvailable()
 	{
 		if(!Inited)
 		{	return -1;	}
@@ -29,8 +31,17 @@ public class CSocket {
 		}
 	}
 	
-	public boolean Init(Socket Sock)
+	protected synchronized void ThrowInitException() throws ngMUDException
 	{
+		throw new ngMUDException("Socket already initialized.");
+	}
+	
+	public synchronized boolean Init(Socket Sock) throws ngMUDException
+	{
+		if(Inited)
+		{
+			ThrowInitException();
+		}
 		if(!Sock.isConnected())
 		{
 			return false;
@@ -40,12 +51,14 @@ public class CSocket {
 		return InitStreams();
 	}
 	
-	public boolean Init(InetAddress Address,int Port,int Timeout,boolean NoDelay)
+	public synchronized boolean SetSoOptions(boolean NoDelay,int Timeout)
 	{
+		if(!Inited)
+		{
+			return false;
+		}
 		try
 		{
-			Sock=new Socket(Address,Port);
-			Sock.setReuseAddress(true);
 			Sock.setTcpNoDelay(NoDelay);
 			Sock.setSoTimeout(Timeout);
 		}
@@ -53,18 +66,20 @@ public class CSocket {
 		{
 			return false;
 		}
-		return InitStreams();
+		return true;
 	}
 	
-	public boolean Init(InetAddress Address,int Port,InetAddress LocalAddress,int LocalPort,
-				 int Timeout,boolean NoDelay)
+	public synchronized boolean Init(InetSocketAddress Address,int Port,
+									 InetSocketAddress LocalAddress,int LocalPort,int Timeout,
+									 boolean NoDelay) throws ngMUDException
 	{
+		if(Inited)
+		{
+			ThrowInitException();
+		}
 		try
 		{
-			Sock=new Socket(Address,Port,LocalAddress,LocalPort);
-			Sock.setReuseAddress(true);
-			Sock.setTcpNoDelay(NoDelay);
-			Sock.setSoTimeout(Timeout);
+			Sock=new Socket(Address.getAddress(),Port,LocalAddress.getAddress(),LocalPort);
 		}
 		catch(IOException e)
 		{
@@ -73,7 +88,7 @@ public class CSocket {
 		return InitStreams();
 	}
 
-	protected boolean InitStreams()
+	protected synchronized boolean InitStreams()
 	{
 		if(!Sock.isConnected())
 		{
@@ -95,14 +110,20 @@ public class CSocket {
 		return true;
 	}
 	
-	public void UnInit()
+	public synchronized void UnInit()
 	{
 		try {
 			StreamIn.close();
+			StreamIn=null;
 			StreamOut.close();
+			StreamOut=null;
 			BufIn.close();
+			BufIn=null;
 			BufOut.close();
+			BufOut=null;
 			Sock.close();
+			Sock=null;
+
 			Inited=false;
 		}
 		catch (IOException e)

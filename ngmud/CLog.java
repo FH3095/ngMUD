@@ -1,4 +1,4 @@
-package ngmud.network;
+package ngmud;
 
 public class CLog {
 }
