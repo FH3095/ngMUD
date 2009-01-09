@@ -5,7 +5,7 @@ import java.io.*;
 import ngmud.ngMUDException;
 
 
-public class CSocket {
+public class CSocket{
 	public CSocket()
 	{
 		Sock=null;
@@ -107,6 +107,47 @@ public class CSocket {
 			return false;
 		}
 		Inited=true;
+		return true;
+	}
+	
+	public synchronized DataInputStream in()
+	{	return StreamIn;	}
+	
+	public synchronized DataOutputStream out()
+	{	return StreamOut;	}
+	
+	public long Skip(long Skip)
+	{
+		if(!Inited)
+		{	return -1;	}
+		try {
+			return BufIn.skip(Skip);
+		}
+		catch(IOException e)
+		{	return -1;	}
+	}
+	
+	public int Available()
+	{
+		if(!Inited)
+		{	return -1;	}
+		try {
+		return BufIn.available();
+		}
+		catch(IOException e)
+		{	return -1;	}
+	}
+	
+	public boolean Flush()
+	{
+		if(!Inited)
+		{	return false;	}
+		try {
+			BufOut.flush();
+		}
+		catch(IOException e)
+		{	return false;	}
+		
 		return true;
 	}
 	

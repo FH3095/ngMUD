@@ -44,6 +44,17 @@ public class CServer extends Thread {
 		Socks=null;
 		CS_ReadingSocks=new Object();
 		CS_WritingSocks=new Object();
+		SetNewSockOptions(false,0);
+	}
+	
+	public boolean SetNewSockOptions(boolean NoDelay,int Timeout)
+	{
+		if(Inited)
+		{	return false;	}
+		this.NewSockNoDelay=NoDelay;
+		this.NewSockTimeout=Timeout;
+		
+		return true;
 	}
 	
 	public boolean Init(int MaxCons,int ReservCons,WHEN_LISTEN_FULL ListenFullAction,
@@ -141,6 +152,8 @@ public class CServer extends Thread {
 					NewSock.Init(Sock);
 				}
 				catch(Exception e) {} // Shouldn't happen in a new initialized class
+				NewSock.SetSoOptions(NewSockNoDelay, NewSockTimeout);
+
 				if(MaxCons-Cons <= 0 && ListenFullAction==WHEN_LISTEN_FULL.ACCEPT_CLOSE)
 				{
 					NewSock.UnInit();
@@ -205,11 +218,18 @@ public class CServer extends Thread {
 		return Sock.IsInited() ? Sock : null;
 	}
 	
+	public CSocket GetUnInitedSock(int Pos)
+	{
+		if(Pos>=Socks.size())
+		{	return null;	}
+		return Socks.get(Pos);
+	}
+	
 	// Max>0 = Max Cons to check, Max < 0 = Complete List checks, Max=0 infinite
-	public CSocket NextReadSock(int Max)
+	public CSocket NextReadSock(int Max,int MinData)
 	{
 		BeginReadSocks();
-		if(Socks.isEmpty())
+		if(Socks.isEmpty() || MinData<=0)
 		{
 			return null;
 		}
@@ -227,7 +247,7 @@ public class CServer extends Thread {
 					Max++;
 				}
 			}
-			if(Check!=null && Check.DataAvailable()!=0)
+			if(Check!=null && Check.DataAvailable()>=MinData)
 			{
 				EndReadSocks();
 				return Check;
