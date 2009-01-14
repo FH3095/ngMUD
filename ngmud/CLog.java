@@ -7,14 +7,19 @@ public class CLog {
 	static protected boolean Inited=false;
 	static protected DataOutputStream Out=null;
 	static protected String Filename="";
+	static protected short LogLevel=0;
 	
 	static public boolean IsInited()
 	{
 		return Inited;
 	}
 	
-	static public void Init(String Filename,boolean Overwrite) throws ngMUDException
+	static public void Init(String Filename,boolean Overwrite,short LogLevel) throws ngMUDException
 	{
+		if(LogLevel<0)
+		{
+			throw new ngMUDException("CRITICAL: CLog: LogLevel<0 is not allowed");
+		}
 		if(Filename=="")
 		{
 			Filename="Log.txt";
@@ -24,7 +29,7 @@ public class CLog {
 		}
 		catch(IOException e)
 		{
-			throw new ngMUDException("CRITICAL: CLOG: Can't initialize Log-File-Stream.",e);
+			throw new ngMUDException("CRITICAL: CLog: Can't initialize Log-File-Stream.",e);
 		}
 		Inited=true;
 		CLog.Filename=Filename;
@@ -38,37 +43,65 @@ public class CLog {
 	
 	static public void Error(String Text)
 	{
-		Out("ERROR: "+GetClassMethod()+Text+"\r\n");
+		if(1<=CLog.LogLevel)
+		{
+			Out("ERROR: "+GetClassMethod()+Text);
+		}
 	}
 	
 	static public void Warning(String Text)
 	{
-		Out("WARNING: "+GetClassMethod()+Text+"\r\n");
+		if(2<=CLog.LogLevel)
+		{
+			Out("WARNING: "+GetClassMethod()+Text);
+		}
 	}
 	
 	static public void Info(String Text)
 	{
-		Out("INFO: "+GetClassMethod()+Text+"\r\n");
+		if(3<=CLog.LogLevel)
+		{
+			Out("INFO: "+GetClassMethod()+Text);
+		}
 	}
 	
 	static public void Debug(String Text)
 	{
-		Out("DEBUG: "+GetClassMethod()+Text+"\r\n");
+		if(4<=CLog.LogLevel)
+		{
+			Out("DEBUG: "+GetClassMethod()+Text);
+		}
 	}
 	
 	static public void Force(String Text)
 	{
-		Out(GetClassMethod()+Text+"\r\n");
+		Out(GetClassMethod()+Text);
+	}
+	
+	static public void Force(String Text,short LogLevel)
+	{
+		if(LogLevel<=CLog.LogLevel)
+		{
+			Out(GetClassMethod()+Text);
+		}
 	}
 	
 	static public void Out(String Text)
 	{
-		System.out.println(Text);
+		System.out.println(Text+"\r\n");
 		try {
-			Out.writeBytes(Text);
+			Out.writeBytes(Text+"\r\n");
 			Out.flush();
 		}
 		catch(IOException e) {}
+	}
+	
+	static public void Out(String Text,short LogLevel)
+	{
+		if(LogLevel<=CLog.LogLevel)
+		{
+			Out(Text);
+		}
 	}
 	
 	static public void UnInit()
