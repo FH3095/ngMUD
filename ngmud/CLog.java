@@ -33,6 +33,7 @@ public class CLog {
 		}
 		Inited=true;
 		CLog.Filename=Filename;
+		CLog.LogLevel=LogLevel;
 	}
 	
 	static protected String GetClassMethod()
