@@ -1,1 +1,1 @@
-See http://fh.dev-area.net/ngMUD/ for more details.
+See http://ngmud.ath.cx/ for more details.
