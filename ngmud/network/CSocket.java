@@ -107,8 +107,6 @@ public class CSocket{
 			BufOut=new BufferedOutputStream(this.Sock.getOutputStream());
 			StreamIn=new DataInputStream(BufIn);
 			StreamOut=new DataOutputStream(BufOut);
-			ObjIn=new ObjectInputStream(StreamIn);
-			ObjOut=new ObjectOutputStream(StreamOut);
 		}
 		catch(IOException e)
 		{
@@ -127,12 +125,6 @@ public class CSocket{
 	
 	public synchronized DataOutputStream out()
 	{	return StreamOut;	}
-	
-	public synchronized ObjectInputStream ObjIn()
-	{	return ObjIn;	}
-	
-	public synchronized ObjectOutputStream ObjOut()
-	{	return ObjOut;	}
 	
 	public long Skip(long Skip)
 	{
@@ -172,10 +164,6 @@ public class CSocket{
 	public synchronized void UnInit()
 	{
 		try {
-			ObjIn.close();
-			ObjIn=null;
-			ObjOut.close();
-			ObjOut=null;
 			StreamIn.close();
 			StreamIn=null;
 			StreamOut.close();
@@ -204,6 +192,4 @@ public class CSocket{
 	protected DataOutputStream StreamOut;
 	protected BufferedInputStream BufIn;
 	protected BufferedOutputStream BufOut;
-	protected ObjectInputStream ObjIn;
-	protected ObjectOutputStream ObjOut;
 }
