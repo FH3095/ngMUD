@@ -4,23 +4,17 @@ import java.net.*;
 import ngmud.callback.CEvent;
 import ngmud.callback.CEventNotifier;
 import java.util.Vector;
+
+import ngmud.CLog;
 import ngmud.ngMUDException;
 
 
-/* WARNING:
- * This class only allows one thread to act with her at once.
- * For example calling UnInit while another Thread 
- */
+
 public class CServer extends Thread {
 	public enum WHEN_LISTEN_FULL
 	{
 		CLOSE, ACCEPT_CLOSE, NOTHING, CALLBACK
 	}
-	protected Vector<CSocket> Socks;
-	protected int CurSocksPos;
-	protected int ReadingSocks;
-	protected Object CS_ReadingSocks,CS_WritingSocks;
-
 	protected CListenSocket ListSock;
 	protected InetSocketAddress ListenSocketAddress;
 	protected int ListenSocketPort;
@@ -28,6 +22,7 @@ public class CServer extends Thread {
 	protected CEvent<CSocket> ListenFullEvent;
 	protected boolean StopListenSocket;
 	
+	protected Vector<CSocket> NewSocks;
 	protected boolean NewSockNoDelay;
 	protected int NewSockTimeout;
 	
@@ -41,9 +36,6 @@ public class CServer extends Thread {
 	{
 		Inited=false;
 		ListSock=new CListenSocket();
-		Socks=null;
-		CS_ReadingSocks=new Object();
-		CS_WritingSocks=new Object();
 		SetNewSockOptions(false,0);
 	}
 	
@@ -57,16 +49,15 @@ public class CServer extends Thread {
 		return true;
 	}
 	
-	public boolean Init(int MaxCons,int ReservCons,WHEN_LISTEN_FULL ListenFullAction,
+	public boolean Init(int MaxCons,WHEN_LISTEN_FULL ListenFullAction,
 						CEvent<CSocket> ListenFullEvent,int SockPort,InetSocketAddress SockAddr)
 						throws ngMUDException
 	{
-		if(ReservCons < 0 || MaxCons < 1 || SockPort < 1 || SockPort > 0xFFFF)
+		if(MaxCons < 1 || SockPort < 1 || SockPort > 0xFFFF)
 		{
-			throw new ngMUDException("SockPort must be 0 < SockPort <= 0xFFFF, "+
-									 "ReservCons and MaxCons must be >= 0"+
-									 "Cur Values: ReservCons="+ReservCons+", MaxCons="
-									 +ReservCons+", SockPort="+SockPort);
+			throw new ngMUDException("SockPort must be 0 < SockPort <= 0xFFFF and "+
+									 "MaxCons must be >= 0"+
+									 "Cur Values: MaxCons="+MaxCons+", SockPort="+SockPort);
 		}
 		if(Inited)
 		{	throw new ngMUDException("CServer already inited");	}
@@ -80,10 +71,6 @@ public class CServer extends Thread {
 		StopListenSocket=false;
 		Cons=0;
 		
-		Socks=new Vector<CSocket>(0,ReservCons);
-		Socks.clear();
-		ReadingSocks=0;
-		CurSocksPos=0;
 		Inited=ListSock.Init(SockPort,SockAddr,ListenFullAction==WHEN_LISTEN_FULL.CLOSE);
 		this.start();
 		return Inited;
@@ -99,16 +86,19 @@ public class CServer extends Thread {
 		{
 				Thread.yield();
 		}
-		for(int i=0;i<Socks.size();i++)
-		{
-			if(Socks.get(i)!=null && Socks.get(i).IsInited())
-			{
-				Socks.get(i).UnInit();
-			}
-		}
-		Socks.clear();
-		Socks=null; // Free for garbage Collection
+		NewSocks.clear();
+		NewSocks=null;
 		Inited=false;
+	}
+	
+	protected synchronized void SoUnInited()
+	{
+		Cons--;
+	}
+	
+	protected synchronized void SoInited()
+	{
+		Cons++;
 	}
 	
 	public void run() // ListenSocket-Handler
@@ -131,7 +121,7 @@ public class CServer extends Thread {
 						}
 						catch(ngMUDException e)
 						{
-							// TODO: Write to Log
+							CLog.Error("Can't init listen-socket after closing because server was full.");
 						}
 					}
 				}
@@ -147,7 +137,7 @@ public class CServer extends Thread {
 			Socket Sock=ListSock.Accept();
 			if(Sock!=null)
 			{
-				CSocket NewSock=new CSocket();
+				CSocket NewSock=new CSocket(this);
 				try {
 					NewSock.Init(Sock);
 				}
@@ -165,121 +155,32 @@ public class CServer extends Thread {
 				}
 				else if(MaxCons-Cons > 0)
 				{
-					boolean Continue=true;
-					synchronized(CS_WritingSocks)
-					{
-						do {
-							synchronized(CS_ReadingSocks)
-							{
-								Continue=ReadingSocks>0;
-							}
-							Thread.yield();
-						} while(Continue);
-						Socks.add(NewSock);
-					}
-					Cons++;
+					NewSocks.add(NewSock);
 				}
 			}
 		}
 		StopListenSocket=true;
 	}
 	
-	public boolean CleanUp()
+	public CSocket GetNewSock(int Pos)
 	{
-		boolean RemovedEntry=false;
-		boolean Continue=true;
-		synchronized(CS_WritingSocks)
-		{
-			do {
-				synchronized(CS_ReadingSocks)
-				{
-					Continue=ReadingSocks>0;
-				}
-				Thread.yield();
-			} while(Continue);
-			for(int i=0;i<Socks.size();i++)
-			{
-				if(Socks.get(i)==null || !Socks.get(i).IsInited())
-				{
-					Socks.remove(i);
-					RemovedEntry=true;
-				}
-			}
-		}
-		return RemovedEntry;
-	}
-	
-	public CSocket GetSock(int Pos)
-	{
-		if(Pos>=Socks.size())
+		if(Pos>=NewSocks.size())
 		{	return null;	}
-		CSocket Sock;
-		Sock=Socks.get(Pos); // Vector is internally synchronized, no need to synch here
-		return Sock.IsInited() ? Sock : null;
+		return NewSocks.get(Pos);
 	}
 	
-	public CSocket GetUnInitedSock(int Pos)
+	public int GetNewSocksSize()
 	{
-		if(Pos>=Socks.size())
-		{	return null;	}
-		return Socks.get(Pos);
+		return NewSocks.size();
 	}
 	
-	// Max>0 = Max Cons to check, Max < 0 = Complete List checks, Max=0 infinite
-	public CSocket NextReadSock(int Max,int MinData)
+	public Vector<CSocket> GetNewSocks()
 	{
-		BeginReadSocks();
-		if(Socks.isEmpty() || MinData<=0)
-		{
-			return null;
-		}
-		boolean Max0= (Max==0 ? true : false);
-		while(Max!=0 || Max0)
-		{
-			CSocket Check;
-			Check=Socks.elementAt(CurSocksPos);
-			CurSocksPos++;
-			if(CurSocksPos>=Socks.size())
-			{
-				CurSocksPos=0;
-				if(Max<0)
-				{
-					Max++;
-				}
-			}
-			if(Check!=null && Check.DataAvailable()>=MinData)
-			{
-				EndReadSocks();
-				return Check;
-			}
-			if(Max>0)
-			{
-				Max--;
-			}
-		}
-		EndReadSocks();
-		return null;
+		return NewSocks;
 	}
 	
-	protected void BeginReadSocks()
+	public void DelNewSocks()
 	{
-		synchronized(CS_WritingSocks) // Flaschenhals, ja, ich weiﬂ. Geht leider nicht anders.
-		{
-			synchronized(CS_ReadingSocks)
-			{
-				ReadingSocks++;
-			}
-		}
-	}
-	
-	protected void EndReadSocks()
-	{
-		synchronized(CS_WritingSocks)
-		{
-			synchronized(CS_ReadingSocks)
-			{
-				ReadingSocks++;
-			}
-		}
+		NewSocks.clear();
 	}
 }

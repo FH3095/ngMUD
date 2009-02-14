@@ -11,6 +11,12 @@ public class CSocket{
 		Sock=null;
 		Inited=false;
 	}
+	public CSocket(CServer Server)
+	{
+		Sock=null;
+		Inited=false;
+		this.Server=Server;
+	}
 	
 	public synchronized boolean IsInited()
 	{
@@ -106,6 +112,10 @@ public class CSocket{
 		{
 			return false;
 		}
+		if(Server!=null)
+		{
+			Server.SoInited();
+		}
 		Inited=true;
 		return true;
 	}
@@ -164,16 +174,20 @@ public class CSocket{
 			BufOut=null;
 			Sock.close();
 			Sock=null;
-
-			Inited=false;
 		}
 		catch (IOException e)
 		{
+		}
+		Inited=false;
+		if(Server!=null)
+		{
+			Server.SoUnInited();
 		}
 	}
 	
 	protected boolean Inited;
 	protected Socket Sock;
+	protected CServer Server;
 	protected DataInputStream StreamIn;
 	protected DataOutputStream StreamOut;
 	protected BufferedInputStream BufIn;
