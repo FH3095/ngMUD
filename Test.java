@@ -15,6 +15,7 @@ public class Test {
 		CLog.Force("Force-Test");
 		CLog.CustomForce("Custom-Force Testüüü");
 		
+		
 		CLog.UnInit();
 	}
 
