@@ -9,7 +9,7 @@ public class CLog {
 		FORCE(-1,"Force"),
 		ONLY_CUSTOM(0,"Custom"),
 		ERROR (1,"<b><span style=\"color: #FF0000\">Error</span></b>"),
-		WARNING (2,"<b><span style=\"color: #CCCC00\">Warnung</span></b>"),
+		WARNING (2,"<b><span style=\"color: #CCCC00\">Warning</span></b>"),
 		INFO (3,"<b><span style=\"color: #00BB00\">Info</span></b>"),
 		DEBUG (4,"Debug"),
 		CUSTOM (5,"<b>Custom</b>");
