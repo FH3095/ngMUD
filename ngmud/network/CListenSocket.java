@@ -42,7 +42,6 @@ public class CListenSocket{
 		try
 		{
 			Sock=new ServerSocket(Port,0,Address.getAddress());
-			Sock.bind(Address);
 			Sock.setReuseAddress(ReUse);
 		}
 		catch(IOException e)

@@ -1,6 +1,10 @@
 import ngmud.CLog;
 import ngmud.ngMUDException;
+import ngmud.network.packets.*;
+import ngmud.network.*;
+import java.net.InetSocketAddress;
 
+import chattest.Server;
 
 public class Test {
 	public static void main(String[] args) throws ngMUDException { // Test-main-Func
@@ -15,8 +19,38 @@ public class Test {
 		CLog.Force("Force-Test");
 		CLog.CustomForce("Custom-Force Testüüü");
 		
+		Thread.currentThread().setPriority(Thread.MIN_PRIORITY+1);
 		
-		CLog.UnInit();
+		Server Serv=new Server();
+		Serv.Run();
+		
+		CSocket Socket=new CSocket();
+		CLog.Warning(Socket.Init(new InetSocketAddress("127.0.0.1",3724), 3724, null, 0, 10, false) ? "Con" : "NoCon");
+		CPacket Pack=new CPacket(Socket);
+		while(true)
+		{
+			if(Pack.GetSock().DataAvailable()>0)
+			{
+				CLog.Warning("There is data!");
+			}
+			if(Pack.Recv()==CPacket.RECIEVED.ALL)
+			{
+				CLog.Error(((Pack_Chat)Pack.GetData()).From+": "+CPacketHelper.BytesToString(((Pack_Chat)Pack.GetData()).Content));
+			}
+			try {
+				Thread.sleep(2000);
+			} catch(Exception e) {}
+			Pack_Chat SendPackData=new Pack_Chat();
+			SendPackData.From=1;
+			SendPackData.Content=CPacketHelper.StringToBytes("FHHFFH");
+			CPacket SendPack=new CPacket(Pack.GetSock());
+			SendPack.SetType(CPacket.PACKET_TYPE.MSG_CHAT);
+			SendPack.SetSubType((short)CPacket.CHAT_PACKET.SAY.ordinal());
+			SendPack.SetData(SendPackData);
+			CLog.Warning(SendPack.Send() ? "Sending Data" : "Failure Sending Data");
+		}
+		
+		//CLog.UnInit();
 	}
 
 }

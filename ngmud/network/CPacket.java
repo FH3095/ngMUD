@@ -1,7 +1,8 @@
 
 package ngmud.network;
 import java.io.IOException;
-import ngmud.network.Packets.*;
+
+import ngmud.network.packets.*;
 
 public class CPacket {
 	protected static final short HEADER_SIZE=6;
@@ -16,12 +17,15 @@ public class CPacket {
 	public void Clean()
 	{
 		Data=null;
-		Type=SubType=Size=(short)0;
+		Type=SubType=Size=(short)-1;
 		HeaderOK=DataOK=false;
 	}
 	
-	public boolean Send()
+	public boolean Send(CSocket Sock)
 	{
+		if(Sock==null || !DataOK || !HeaderOK)
+		{	return false;	}
+		
 		try {
 			Sock.out().writeShort(Type);
 			Sock.out().writeShort(SubType);
@@ -34,14 +38,22 @@ public class CPacket {
 		return Data.Send(Sock);
 	}
 	
-	public RECIEVED Recv()
+	public boolean Send()
 	{
+		return Send(Sock);
+	}
+	
+	public RECIEVED Recv(CSocket Sock)
+	{
+		if(Sock==null)
+		{	return RECIEVED.ERROR;	}
+		
 		if(DataOK && HeaderOK)
 		{	Clean();	}
 		RECIEVED Ret=RECIEVED.NOTHING;
 		if(!HeaderOK)
 		{
-			if(Sock.Available()>=HEADER_SIZE)
+			if(Sock.DataAvailable()>=HEADER_SIZE)
 			{
 				try
 				{
@@ -52,13 +64,13 @@ public class CPacket {
 				catch(IOException e)
 				{	return RECIEVED.ERROR;	}
 				HeaderOK=true;
-				Data=GetNewPacket();
+				Data=GetNewPacket(Type);
 				Ret=RECIEVED.HEADER;
 			}
 		}
 		if(HeaderOK && !DataOK)
 		{
-			if(Sock.Available()>=Size)
+			if(Sock.DataAvailable()>=Size)
 			{
 				if(!Data.Recv(Sock,Size))
 				{	return RECIEVED.ERROR;	}
@@ -69,15 +81,36 @@ public class CPacket {
 		return Ret;
 	}
 	
+	public RECIEVED Recv()
+	{
+		return Recv(Sock);
+	}
+	
 	public CPacket(CSocket Sock)
 	{
 		Clean();
 		this.Sock=Sock;
 	}
 	
+	public CPacket()
+	{
+		Clean();
+		Sock=null;
+	}
+	
+	public void SetSock(CSocket Sock)
+	{
+		this.Sock=Sock;
+	}
+	
+	public CSocket GetSock()
+	{
+		return Sock;
+	}
+	
 	public short GetType()
 	{
-		if(HeaderOK)
+		if(HeaderOK && Sock!=null)
 		{
 			return Type;
 		}
@@ -86,7 +119,7 @@ public class CPacket {
 	
 	public short GetSubType()
 	{
-		if(HeaderOK)
+		if(HeaderOK && Sock!=null)
 		{
 			return SubType;
 		}
@@ -95,7 +128,7 @@ public class CPacket {
 	
 	public short GetDateSize()
 	{
-		if(HeaderOK)
+		if(HeaderOK && Sock!=null)
 		{
 			return Size;
 		}
@@ -104,7 +137,7 @@ public class CPacket {
 	
 	public SubPacket GetData()
 	{
-		if(DataOK)
+		if(DataOK && Sock!=null)
 		{
 			return Data;
 		}
@@ -125,7 +158,7 @@ public class CPacket {
 	
 	protected boolean HeaderComplete()
 	{
-		return Type!=0 && SubType!=0;
+		return Type!=-1 && SubType!=-1;
 	}
 	
 	public void SetData(SubPacket Data)
@@ -149,11 +182,11 @@ public class CPacket {
 		MSG_CHAT, MSG_POS, MSG_STAT, SMSG_MAP;
 	}
 	
-	enum CHAT_PACKET {
+	public enum CHAT_PACKET {
 		SAY, YELL, GROUP, WHISPER, GUILD, CHANNEL, CHANNEL_JOINED, CHANNEL_LEFT,  
 	}
 	
-	protected SubPacket GetNewPacket()
+	protected static SubPacket GetNewPacket(short Type)
 	{
 		switch(PACKET_TYPE.values()[Type])
 		{

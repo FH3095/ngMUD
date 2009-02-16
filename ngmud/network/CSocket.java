@@ -18,9 +18,27 @@ public class CSocket{
 		this.Server=Server;
 	}
 	
+	protected void finalize()
+	{
+		UnInit();
+	}
+	
 	public synchronized boolean IsInited()
 	{
 		return Inited;
+	}
+	
+	public synchronized boolean IsConnected()
+	{
+		if(!Inited || Sock==null)
+		{
+			return false;
+		}
+		if(Sock.isConnected())
+		{
+			return true;
+		}
+		return false;
 	}
 	
 	public synchronized int DataAvailable()
@@ -35,6 +53,11 @@ public class CSocket{
 		{
 			return -1;
 		}
+	}
+	
+	public int Available()
+	{
+		return DataAvailable();
 	}
 	
 	protected synchronized void ThrowInitException() throws ngMUDException
@@ -85,7 +108,14 @@ public class CSocket{
 		}
 		try
 		{
-			Sock=new Socket(Address.getAddress(),Port,LocalAddress.getAddress(),LocalPort);
+			if(LocalAddress!=null)
+			{
+				Sock=new Socket(Address.getAddress(),Port,LocalAddress.getAddress(),LocalPort);
+			}
+			else
+			{
+				Sock=new Socket(Address.getAddress(),Port);
+			}
 		}
 		catch(IOException e)
 		{
@@ -104,9 +134,8 @@ public class CSocket{
 		try
 		{
 			BufIn=new BufferedInputStream(this.Sock.getInputStream());
-			BufOut=new BufferedOutputStream(this.Sock.getOutputStream());
+			StreamOut=new DataOutputStream(this.Sock.getOutputStream());
 			StreamIn=new DataInputStream(BufIn);
-			StreamOut=new DataOutputStream(BufOut);
 		}
 		catch(IOException e)
 		{
@@ -114,7 +143,7 @@ public class CSocket{
 		}
 		if(Server!=null)
 		{
-			Server.SoInited();
+			Server.ConChange(true);
 		}
 		Inited=true;
 		return true;
@@ -137,23 +166,12 @@ public class CSocket{
 		{	return -1;	}
 	}
 	
-	public int Available()
-	{
-		if(!Inited)
-		{	return -1;	}
-		try {
-		return BufIn.available();
-		}
-		catch(IOException e)
-		{	return -1;	}
-	}
-	
 	public boolean Flush()
 	{
 		if(!Inited)
 		{	return false;	}
 		try {
-			BufOut.flush();
+			StreamOut.flush();
 		}
 		catch(IOException e)
 		{	return false;	}
@@ -170,8 +188,6 @@ public class CSocket{
 			StreamOut=null;
 			BufIn.close();
 			BufIn=null;
-			BufOut.close();
-			BufOut=null;
 			Sock.close();
 			Sock=null;
 		}
@@ -181,15 +197,14 @@ public class CSocket{
 		Inited=false;
 		if(Server!=null)
 		{
-			Server.SoUnInited();
+			Server.ConChange(false);
 		}
 	}
 	
 	protected boolean Inited;
-	protected Socket Sock;
+	public Socket Sock;
 	protected CServer Server;
 	protected DataInputStream StreamIn;
 	protected DataOutputStream StreamOut;
 	protected BufferedInputStream BufIn;
-	protected BufferedOutputStream BufOut;
 }

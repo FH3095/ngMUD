@@ -23,6 +23,9 @@ public class CServer extends Thread {
 	protected boolean StopListenSocket;
 	
 	protected Vector<CSocket> NewSocks;
+	protected Object CS_NewSocks;
+	
+	
 	protected boolean NewSockNoDelay;
 	protected int NewSockTimeout;
 	
@@ -37,6 +40,7 @@ public class CServer extends Thread {
 		Inited=false;
 		ListSock=new CListenSocket();
 		SetNewSockOptions(false,0);
+		CS_NewSocks=new Object();
 	}
 	
 	public boolean SetNewSockOptions(boolean NoDelay,int Timeout)
@@ -71,6 +75,8 @@ public class CServer extends Thread {
 		StopListenSocket=false;
 		Cons=0;
 		
+		NewSocks=new Vector<CSocket>();
+		
 		Inited=ListSock.Init(SockPort,SockAddr,ListenFullAction==WHEN_LISTEN_FULL.CLOSE);
 		this.start();
 		return Inited;
@@ -91,14 +97,12 @@ public class CServer extends Thread {
 		Inited=false;
 	}
 	
-	protected synchronized void SoUnInited()
+	protected synchronized void ConChange(boolean Add)
 	{
-		Cons--;
-	}
-	
-	protected synchronized void SoInited()
-	{
-		Cons++;
+		if(Add)
+		{	Cons++;	}
+		else
+		{	Cons--;	}
 	}
 	
 	public void run() // ListenSocket-Handler
@@ -155,32 +159,23 @@ public class CServer extends Thread {
 				}
 				else if(MaxCons-Cons > 0)
 				{
-					NewSocks.add(NewSock);
+					synchronized(CS_NewSocks)
+					{
+						NewSocks.add(NewSock);
+					}
 				}
 			}
 		}
 		StopListenSocket=true;
 	}
 	
-	public CSocket GetNewSock(int Pos)
-	{
-		if(Pos>=NewSocks.size())
-		{	return null;	}
-		return NewSocks.get(Pos);
-	}
-	
-	public int GetNewSocksSize()
-	{
-		return NewSocks.size();
-	}
-	
 	public Vector<CSocket> GetNewSocks()
 	{
-		return NewSocks;
-	}
-	
-	public void DelNewSocks()
-	{
-		NewSocks.clear();
+		synchronized(CS_NewSocks)
+		{
+			Vector<CSocket> OldSocks=NewSocks;
+			NewSocks=new Vector<CSocket>();
+			return OldSocks;
+		}
 	}
 }

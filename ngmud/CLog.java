@@ -94,7 +94,7 @@ public class CLog {
 		{
 			String ClassMethod=GetClassMethod();
 			OutHtml(LOG_LEVEL.ERROR,LOG_LEVEL.ERROR.GetNum(),ClassMethod,Text);
-			OutTxt("ERROR: "+ClassMethod+Text);
+			OutTxt("ERROR: "+ClassMethod+": "+Text);
 		}
 	}
 	
