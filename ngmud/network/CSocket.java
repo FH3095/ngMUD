@@ -202,7 +202,7 @@ public class CSocket{
 	}
 	
 	protected boolean Inited;
-	public Socket Sock;
+	protected Socket Sock;
 	protected CServer Server;
 	protected DataInputStream StreamIn;
 	protected DataOutputStream StreamOut;

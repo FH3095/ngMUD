@@ -1,7 +1,6 @@
 
 package ngmud.network;
 import java.io.IOException;
-
 import ngmud.network.packets.*;
 
 public class CPacket {
