@@ -1,13 +1,17 @@
 package ngmud.network.packets;
 
 import java.io.IOException;
-
 import ngmud.network.CPacketHelper;
 import ngmud.network.CSocket;
 
 public class Pack_Chat extends SubPacket {
+	public static final short PACK_NUM=1;
 	public long From;
 	public byte Content[];
+	
+	public enum SUB_TYPE {
+		SAY, YELL, GROUP, WHISPER, GUILD, CHANNEL, CHANNEL_JOINED, CHANNEL_LEFT,
+	}
 	
 	public boolean Recv(CSocket Sock,int Size)
 	{

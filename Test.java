@@ -19,6 +19,8 @@ public class Test {
 		CLog.Force("Force-Test");
 		CLog.CustomForce("Custom-Force Testüüü");
 		
+		//CPacket.InitPackets("Test.ini");
+		CPacket.InitPackets("Test.ini");
 		Thread.currentThread().setPriority(Thread.MIN_PRIORITY+1);
 		
 		Server Serv=new Server();
@@ -44,8 +46,8 @@ public class Test {
 			SendPackData.From=1;
 			SendPackData.Content=CPacketHelper.StringToBytes("FHHFFH");
 			CPacket SendPack=new CPacket(Pack.GetSock());
-			SendPack.SetType(CPacket.PACKET_TYPE.MSG_CHAT);
-			SendPack.SetSubType((short)CPacket.CHAT_PACKET.SAY.ordinal());
+			SendPack.SetType((short)1);
+			SendPack.SetSubType((short)Pack_Chat.SUB_TYPE.SAY.ordinal());
 			SendPack.SetData(SendPackData);
 			CLog.Warning(SendPack.Send() ? "Sending Data" : "Failure Sending Data");
 		}

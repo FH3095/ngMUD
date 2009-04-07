@@ -5,7 +5,7 @@ import java.nio.charset.Charset;
 import java.io.IOException;
 
 
-public class CPacketHelper {
+public abstract class CPacketHelper {
 	public static final Charset UTF8=Charset.forName("UTF-8");
 	public static byte[] StringToBytes(String Str)
 	{

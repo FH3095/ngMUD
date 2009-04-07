@@ -1,6 +1,9 @@
 
 package ngmud.network;
-import java.io.IOException;
+import java.io.*;
+import java.util.*;
+
+import ngmud.CLog;
 import ngmud.network.packets.*;
 
 public class CPacket {
@@ -143,9 +146,9 @@ public class CPacket {
 		return null;
 	}
 	
-	public void SetType(PACKET_TYPE Type)
+	public void SetType(short Type)
 	{
-		this.Type=(short)Type.ordinal();
+		this.Type=Type;
 		HeaderOK=HeaderComplete();
 	}
 	
@@ -166,9 +169,9 @@ public class CPacket {
 		DataOK=true;
 	}
 	
-	public void MakePacket(PACKET_TYPE Type,short SubType,SubPacket Data)
+	public void MakePacket(short Type,short SubType,SubPacket Data)
 	{
-		this.Type=(short)Type.ordinal();
+		this.Type=Type;
 		this.SubType=SubType;
 		this.Data=Data;
 	}
@@ -177,22 +180,103 @@ public class CPacket {
 		ERROR,NOTHING,HEADER,ALL
 	}
 	
-	public enum PACKET_TYPE {
-		MSG_CHAT, MSG_POS, MSG_STAT, SMSG_MAP;
-	}
+	protected static TreeMap<Short,Class> PacketTypes=null;
 	
-	public enum CHAT_PACKET {
-		SAY, YELL, GROUP, WHISPER, GUILD, CHANNEL, CHANNEL_JOINED, CHANNEL_LEFT,  
-	}
-	
-	protected static SubPacket GetNewPacket(short Type)
+	public static boolean InitPackets(String File)
 	{
-		switch(PACKET_TYPE.values()[Type])
+		Properties Conf=new Properties();
+		try {
+			Conf.load(new FileInputStream(File));
+		}
+		catch(IOException e)
 		{
-		case MSG_CHAT:
-			return new Pack_Chat();
-		case MSG_POS:
-			break;
+			return false;
+		}
+		PacketTypes=new TreeMap<Short,Class>();
+		Enumeration E;
+		E=Conf.propertyNames();
+		while(E.hasMoreElements())
+		{
+			String Element=(String)E.nextElement();
+			try {
+				if(Integer.parseInt(Conf.getProperty(Element, "0"))==1)
+				{
+					Class C=null;
+					try {
+						C=Class.forName("ngmud.network.packets."+Element);
+					}
+					catch(ClassNotFoundException e)
+					{
+						CLog.Error("Can't load class ngmud.network.packets."+Element+".");
+						continue;
+					}
+					if(C!=null)
+					{
+						SubPacket Pack=null;
+						try {
+							Pack=(SubPacket)C.newInstance();
+						}
+						catch(IllegalAccessException e)
+						{
+							CLog.Error("Can't access class "+C.getName()+".");
+							continue;
+						}
+						catch(InstantiationException e)
+						{
+							CLog.Error("Can't create an instance from "+C.getName()+".");
+							continue;
+						}
+						if(Pack==null)
+						{
+							CLog.Error("Can't create instance for unknown reason from "+
+							           C.getName()+".");
+							continue;
+						}
+
+						short PackNum=0;
+						try {
+							PackNum=C.getField("PACK_NUM").getShort(Pack);
+						}
+						catch(IllegalAccessException e)
+						{
+							CLog.Error("Can't access PACK_NUM in "+C.getName());
+							continue;
+						}
+						catch(NoSuchFieldException e)
+						{
+							CLog.Error("Class "+C.getName()+" hasn't a field called PACK_NUM.");
+							continue;
+						}
+						if(PackNum!=0)
+						{
+							PacketTypes.put(PackNum, C);
+						}
+					}
+				}
+			}
+			catch(NumberFormatException e) {}
+		}
+		
+		
+		return true;
+	}
+	
+	public static SubPacket GetNewPacket(int Type)
+	{
+		if(PacketTypes==null)
+		{	return null;	}
+		
+		Class C=PacketTypes.get(Type);
+		if(C!=null)
+		{
+			try {
+				return (SubPacket)(C.newInstance());
+			}
+			catch(Exception e)
+			{
+				CLog.Error("Can't create instance from class "+C.getName()+".");
+				return null;
+			}
 		}
 		return null;
 	}
