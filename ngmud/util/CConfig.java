@@ -134,4 +134,22 @@ public class CConfig {
 		}
 		return Ret;
 	}
+	
+	public  CPair<LinkedList<String>,LinkedList<String>> GetKeysAndValuesSeperate()
+	{
+		if(Conf==null)
+		{	return null;	}
+		CPair<LinkedList<String>,LinkedList<String>> Ret=
+			new CPair<LinkedList<String>,LinkedList<String>>
+				(new LinkedList<String>(),new LinkedList<String>());
+		Set<String> Keys=GetStringKeys();
+		Iterator<String> It=Keys.iterator();
+		while(It.hasNext())
+		{
+			String Cur=It.next();
+			Ret.GetFirst().add(Cur);
+			Ret.GetSecond().add(Get(Cur));
+		}
+		return Ret;
+	}
 }

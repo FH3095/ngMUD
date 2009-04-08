@@ -3,8 +3,10 @@ import ngmud.ngMUDException;
 import ngmud.network.packets.*;
 import ngmud.network.*;
 import ngmud.util.CConfig;
+import ngmud.util.CPair;
 
 import java.net.InetSocketAddress;
+import java.util.LinkedList;
 
 import chattest.Server;
 
@@ -24,7 +26,8 @@ public class Test {
 		//CPacket.InitPackets("Test.ini");
 		CConfig Conf=new CConfig();
 		Conf.Init("Packets.ini",false);
-		CPacket.InitPackets(Conf.GetKeysAndValues());
+		CPair<LinkedList<String>,LinkedList<String>> Pair=Conf.GetKeysAndValuesSeperate();
+		CPacket.InitPackets(Pair.GetFirst(),Pair.GetSecond());
 		Thread.currentThread().setPriority(Thread.MIN_PRIORITY+1);
 		
 		Server Serv=new Server();

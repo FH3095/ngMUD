@@ -2,8 +2,8 @@
 package ngmud.network;
 import java.io.*;
 import java.util.*;
-import ngmud.util.CPair;
 import ngmud.CLog;
+import ngmud.util.CHelper;
 import ngmud.network.packets.*;
 
 public class CPacket {
@@ -182,48 +182,36 @@ public class CPacket {
 	
 	protected static TreeMap<Short,Class<?> > PacketTypes=null;
 	
-	public static boolean InitPackets(LinkedList<CPair<String,String>> Classes)
+	public static boolean InitPackets(LinkedList<String> Classes,LinkedList<String> Values)
 	{
 		PacketTypes=new TreeMap<Short,Class<?> >();
-		Iterator<CPair<String,String>> It=Classes.iterator();
-		while(It.hasNext())
+		Iterator<String> CIt=Classes.iterator();
+		Iterator<String> VIt=Values.iterator();
+		while(CIt.hasNext())
 		{
-			CPair<String,String> Element=It.next();
+			String ClassName=CIt.next();
 			try {
-				if(Integer.parseInt(Element.GetSecond())==1)
+				if(Integer.parseInt(VIt.next())==1)
 				{
-					Class<?> C=null;
-					try {
-						C=Class.forName("ngmud.network.packets."+Element.GetFirst());
-					}
-					catch(ClassNotFoundException e)
-					{
-						CLog.Error("Can't load class ngmud.network.packets."+Element.GetFirst()+".");
-						continue;
-					}
+					Class<?> C=CHelper.FindClass("ngmud.network.packets.",ClassName,true);
 					if(C!=null)
 					{
 						SubPacket Pack=null;
 						try {
 							Pack=(SubPacket)C.newInstance();
 						}
-						catch(IllegalAccessException e)
+						catch(Exception e)
 						{
-							CLog.Error("Can't access class "+C.getName()+".");
-							continue;
-						}
-						catch(InstantiationException e)
-						{
-							CLog.Error("Can't create an instance from "+C.getName()+".");
+							CLog.Error("Can't create instance from "+C.getName()+
+							           " for unknown reason.");
 							continue;
 						}
 						if(Pack==null)
 						{
-							CLog.Error("Can't create instance for unknown reason from "+
-							           C.getName()+".");
+							CLog.Error("Instance from "+C.getName()+
+							           " wasn't created for unknown reason.");
 							continue;
 						}
-
 						short PackNum=0;
 						try {
 							PackNum=C.getField("PACK_NUM").getShort(Pack);
