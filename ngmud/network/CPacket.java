@@ -2,7 +2,7 @@
 package ngmud.network;
 import java.io.*;
 import java.util.*;
-
+import ngmud.util.CPair;
 import ngmud.CLog;
 import ngmud.network.packets.*;
 
@@ -180,34 +180,25 @@ public class CPacket {
 		ERROR,NOTHING,HEADER,ALL
 	}
 	
-	protected static TreeMap<Short,Class> PacketTypes=null;
+	protected static TreeMap<Short,Class<?> > PacketTypes=null;
 	
-	public static boolean InitPackets(String File)
+	public static boolean InitPackets(LinkedList<CPair<String,String>> Classes)
 	{
-		Properties Conf=new Properties();
-		try {
-			Conf.load(new FileInputStream(File));
-		}
-		catch(IOException e)
+		PacketTypes=new TreeMap<Short,Class<?> >();
+		Iterator<CPair<String,String>> It=Classes.iterator();
+		while(It.hasNext())
 		{
-			return false;
-		}
-		PacketTypes=new TreeMap<Short,Class>();
-		Enumeration E;
-		E=Conf.propertyNames();
-		while(E.hasMoreElements())
-		{
-			String Element=(String)E.nextElement();
+			CPair<String,String> Element=It.next();
 			try {
-				if(Integer.parseInt(Conf.getProperty(Element, "0"))==1)
+				if(Integer.parseInt(Element.GetSecond())==1)
 				{
-					Class C=null;
+					Class<?> C=null;
 					try {
-						C=Class.forName("ngmud.network.packets."+Element);
+						C=Class.forName("ngmud.network.packets."+Element.GetFirst());
 					}
 					catch(ClassNotFoundException e)
 					{
-						CLog.Error("Can't load class ngmud.network.packets."+Element+".");
+						CLog.Error("Can't load class ngmud.network.packets."+Element.GetFirst()+".");
 						continue;
 					}
 					if(C!=null)
@@ -266,7 +257,7 @@ public class CPacket {
 		if(PacketTypes==null)
 		{	return null;	}
 		
-		Class C=PacketTypes.get(Type);
+		Class<?> C=PacketTypes.get(Type);
 		if(C!=null)
 		{
 			try {

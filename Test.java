@@ -2,6 +2,8 @@ import ngmud.CLog;
 import ngmud.ngMUDException;
 import ngmud.network.packets.*;
 import ngmud.network.*;
+import ngmud.util.CConfig;
+
 import java.net.InetSocketAddress;
 
 import chattest.Server;
@@ -20,7 +22,9 @@ public class Test {
 		CLog.CustomForce("Custom-Force Testüüü");
 		
 		//CPacket.InitPackets("Test.ini");
-		CPacket.InitPackets("Test.ini");
+		CConfig Conf=new CConfig();
+		Conf.Init("Packets.ini",false);
+		CPacket.InitPackets(Conf.GetKeysAndValues());
 		Thread.currentThread().setPriority(Thread.MIN_PRIORITY+1);
 		
 		Server Serv=new Server();
@@ -46,7 +50,7 @@ public class Test {
 			SendPackData.From=1;
 			SendPackData.Content=CPacketHelper.StringToBytes("FHHFFH");
 			CPacket SendPack=new CPacket(Pack.GetSock());
-			SendPack.SetType((short)1);
+			SendPack.SetType(Pack_Chat.PACK_NUM);
 			SendPack.SetSubType((short)Pack_Chat.SUB_TYPE.SAY.ordinal());
 			SendPack.SetData(SendPackData);
 			CLog.Warning(SendPack.Send() ? "Sending Data" : "Failure Sending Data");
