@@ -4,7 +4,6 @@ import ngmud.network.packets.*;
 import ngmud.network.*;
 import ngmud.util.CConfig;
 import ngmud.util.CPair;
-
 import java.net.InetSocketAddress;
 import java.util.LinkedList;
 
