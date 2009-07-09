@@ -2,7 +2,6 @@ package ngmud.util;
 
 import java.io.*;
 import java.util.*;
-
 import ngmud.CLog;
 
 public class CConfig {
