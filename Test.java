@@ -64,8 +64,7 @@ public class Test {
 		
 		//CLog.UnInit();
 	}
-	
-	
+
 	public static void GfxTest()
 	{
 		// in this case we only care about the dimensions of the screen, we're aiming
@@ -77,82 +76,81 @@ public class Test {
 		DisplayMode chosenMode = null;
 		 
 		try {
-		     DisplayMode[] modes = Display.getAvailableDisplayModes();
+			DisplayMode[] modes = Display.getAvailableDisplayModes();
 		     
 		 
-		     for (int i=0;i<modes.length;i++) {
-		          if ((modes[i].getWidth() == targetWidth) && (modes[i].getHeight() == targetHeight)) {
-		               chosenMode = modes[i];
-		               break;
-		          }
-		     }
+			for (int i=0;i<modes.length;i++) {
+				if ((modes[i].getWidth() == targetWidth) && (modes[i].getHeight() == targetHeight)) {
+					chosenMode = modes[i];
+					break;
+				}
+			}
 		} catch (LWJGLException e) {     
-		     Sys.alert("Error", "Unable to determine display modes.");
-		     System.exit(0);
+			Sys.alert("Error", "Unable to determine display modes.");
+			System.exit(0);
 		}
 		 
 		// at this point if we have no mode there was no appropriate, let the user know 
 		// and give up
 		if (chosenMode == null) {
-		     Sys.alert("Error", "Unable to find appropriate display mode.");
-		     System.exit(0);
+			Sys.alert("Error", "Unable to find appropriate display mode.");
+			System.exit(0);
 		}
 		
 		try {
-		    //Display.setDisplayMode(chosenMode);
-		    Display.setTitle("An example title");
-		    Display.setVSyncEnabled(true);
-		    Display.create();
-		    GL11.glClearColor(00,0,00,0);
+			Display.setDisplayMode(chosenMode);
+			Display.setTitle("Example");
+			Display.setVSyncEnabled(true);
+			Display.create();
+			GL11.glClearColor(0,0,0,0);
 		} catch (LWJGLException e) {
-		    Sys.alert("","Unable to create display.");
-		    System.exit(0);
+			Sys.alert("","Unable to create display.");
+			System.exit(0);
 		}
 		boolean gameRunning=true;
 		long FPSTime=GetTime()+1000;
 		int FPS=0;
-		float angle=0;
+		float pos=1.0f;
 		 
 		while (gameRunning) {
-		     // perform game logic updates here
+			// perform game logic updates here
+			pos -= 0.01f;    
+		 
+			// render using OpenGL 
+			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
+			GL11.glBegin(GL11.GL_QUADS);
+			GL11.glVertex3f(pos,pos,pos);
+			GL11.glVertex3f(1,pos,pos);
+			GL11.glVertex3f(1,1,pos);
+			GL11.glVertex3f(pos,1,pos);
+			GL11.glEnd();
+		    
+			if(pos<=-1.0f)
+			{	pos=1.0f;	}
+		 
+			// now tell the screen to update
 			Display.update();
-			angle += 2.0f % 360;
-		    GL11.glPushMatrix();
-		    GL11.glTranslatef(Display.getDisplayMode().getWidth() / 2, Display.getDisplayMode().getHeight() / 2, 0.0f);
+			Display.sync(60);
 		 
-		      // rotate square according to angle
-		      GL11.glRotatef(angle, 0, 0, 1.0f);
-		 
-		      // render the square
-		      GL11.glBegin(GL11.GL_QUADS);
-		        GL11.glVertex2i(-50, -50);
-		        GL11.glVertex2i(50, -50);
-		        GL11.glVertex2i(50, 50);
-		        GL11.glVertex2i(-50, 50);
-		      GL11.glEnd();
-		 
-		    GL11.glPopMatrix();
-		    Display.sync(60);
-		     FPS++;
-		     if(GetTime()>FPSTime)
-		     {
-		    	 CLog.CustomForce("FPS "+FPS);
-		    	 FPS=0;
-		    	 FPSTime=GetTime()+1000;
-		     }
-		 
-		     // finally check if the user has requested that the display be 
-		     // shutdown
-		     if (Display.isCloseRequested()) {
-		           gameRunning = false;
-		           Display.destroy();
-		           System.exit(0);
-		     }
+			// finally check if the user has requested that the display be 
+			// shutdown
+			if (Display.isCloseRequested()) {
+				gameRunning = false;
+				Display.destroy();
+				System.exit(0);
+			}
+			FPS++;
+			if(GetTime()>FPSTime)
+			{
+				CLog.CustomForce("FPS "+FPS);
+				FPS=0;
+				FPSTime=GetTime()+1000;
+			}
 		}
 	}
-	
+
 	public static long GetTime() {
-	    return (Sys.getTime() * 1000) / Sys.getTimerResolution();
+		return (Sys.getTime() * 1000) / Sys.getTimerResolution();
 	}
 
 }
