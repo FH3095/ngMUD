@@ -7,6 +7,7 @@ import ngmud.util.CPair;
 import java.net.InetSocketAddress;
 import java.util.LinkedList;
 import org.lwjgl.*;
+import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.*;
 
 import chattest.Server;
@@ -124,6 +125,8 @@ public class Test {
 			GL11.glVertex3f(1,1,pos);
 			GL11.glVertex3f(pos,1,pos);
 			GL11.glEnd();
+			GL11.glFlush();
+			GL11.glFinish();
 		    
 			if(pos<=-1.0f)
 			{	pos=1.0f;	}
