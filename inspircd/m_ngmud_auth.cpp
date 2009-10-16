@@ -23,15 +23,18 @@ class ModuleNgmudAuth : public Module
 	Module* SQLutils;
 	Module* SQLprovider;
 
-	std::string AllowPattern;
+	std::string AllowNickPattern;
+	std::string AllowAccPattern;
 	std::string DbId;
 	std::string PermBanKillReason;
 	std::string TempBanKillReason;
-	std::string UnknownAccKillReason;
+	std::string UnknownAccOrCharKillReason;
 	std::string ErrorKillReason;
 	
 	std::string HostPostfix;
 	std::string NoAccHost;
+	
+	std::string DynamicDB;
 	
 	bool Verbose;
 
@@ -65,20 +68,23 @@ public:
 	{
 		ConfigReader Conf(ServerInstance);
 
-		DbId	= Conf.ReadValue("ngmud_auth", "dbid", 0);
-		PermBanKillReason		= Conf.ReadValue("ngmud_auth", "permbankill", 0);
-		TempBanKillReason		= Conf.ReadValue("ngmud_auth", "tempbankill", 0);
-		UnknownAccKillReason	= Conf.ReadValue("ngmud_auth", "unknownacckill",0 );
-		AllowPattern			= Conf.ReadValue("ngmud_auth", "allowpattern",0);
-		ErrorKillReason			= Conf.ReadValue("ngmud_auth", "errorkill",0);
-		Verbose					= Conf.ReadFlag("ngmud_auth", "debug",0);
-		HostPostfix				= Conf.ReadValue("ngmud_auth", "hostpostfix",0);
-		NoAccHost				= Conf.ReadValue("ngmud_auth", "noacchost",0);
+		DbId						= Conf.ReadValue("ngmud_auth", "dbid", 0);
+		PermBanKillReason			= Conf.ReadValue("ngmud_auth", "permbankill", 0);
+		TempBanKillReason			= Conf.ReadValue("ngmud_auth", "tempbankill", 0);
+		UnknownAccOrCharKillReason	= Conf.ReadValue("ngmud_auth", "unknownaccorcharkill",0 );
+		AllowNickPattern			= Conf.ReadValue("ngmud_auth", "allownick",0);
+		AllowAccPattern				= Conf.ReadValue("ngmud_auth", "allowacc",0);
+		ErrorKillReason				= Conf.ReadValue("ngmud_auth", "errorkill",0);
+		Verbose						= Conf.ReadFlag ("ngmud_auth", "debug",0);
+		HostPostfix					= Conf.ReadValue("ngmud_auth", "hostpostfix",0);
+		NoAccHost					= Conf.ReadValue("ngmud_auth", "noacchost",0);
+		DynamicDB					= Conf.ReadValue("ngmud_auth", "dynamicdb",0);
 	}
 
 	virtual int OnUserRegister(User* user)
 	{
-		if ((!AllowPattern.empty()) && (InspIRCd::Match(user->ident,AllowPattern)))
+		if (!AllowAccPattern.empty()  && InspIRCd::Match(user->ident,AllowAccPattern) &&
+		    !AllowNickPattern.empty() && InspIRCd::Match(user->nick,AllowNickPattern))
 		{
 			static int Val=0;
 			user->Extend("ngmud_auth",&Val);
@@ -96,15 +102,16 @@ public:
 
 	bool CheckCredentials(User* user)
 	{
-	                                   // 0     1             2
-		static std::string Query("SELECT id,show_name, "
+													// 0     1             2
+		static std::string Query(std::string("SELECT a.id,a.show_name, "
 								 "(SELECT IF( perm!=0, 'perm', until ) FROM account_ban ab WHERE "
 		                         "a.id = ab.id AND "
 								 "(until > CURRENT_TIMESTAMP OR perm !=0) ORDER BY perm DESC , until DESC LIMIT 1) AS ban "
-		                         "FROM account a WHERE a.login_name LIKE '?' AND a.pwd = '?'");
+		                         "FROM account a JOIN ")+DynamicDB+std::string(".char_character c ON c.account=a.id "
+								 "WHERE a.login_name LIKE '?' AND a.pwd = '?' AND c.name LIKE '?'"));
 
 		/* Build the query */
-		SQLrequest req = SQLrequest(this, SQLprovider, DbId, (SQLquery(Query.c_str()),user->ident.c_str(),user->password.c_str()));
+		SQLrequest req = SQLrequest(this, SQLprovider, DbId, (SQLquery(Query.c_str()),user->ident.c_str(),user->password.c_str(),user->nick.c_str()));
 
 		if(req.Send())
 		{
@@ -171,7 +178,7 @@ public:
 					}
 					else
 					{
-						ServerInstance->Users->QuitUser(user,UnknownAccKillReason);
+						ServerInstance->Users->QuitUser(user,UnknownAccOrCharKillReason);
 					}
 				}
 				else
