@@ -30,12 +30,14 @@ class ModuleNgmudAuth : public Module
 	std::string TempBanKillReason;
 	std::string UnknownAccOrCharKillReason;
 	std::string ErrorKillReason;
-	
+
 	std::string HostPostfix;
 	std::string NoAccHost;
-	
+
+	std::string NoGuildIdent;
+
 	std::string DynamicDB;
-	
+
 	bool Verbose;
 
 public:
@@ -79,6 +81,7 @@ public:
 		HostPostfix					= Conf.ReadValue("ngmud_auth", "hostpostfix",0);
 		NoAccHost					= Conf.ReadValue("ngmud_auth", "noacchost",0);
 		DynamicDB					= Conf.ReadValue("ngmud_auth", "dynamicdb",0);
+		NoGuildIdent				= Conf.ReadValue("ngmud_auth", "noguildname",0);
 	}
 
 	virtual int OnUserRegister(User* user)
@@ -102,11 +105,16 @@ public:
 
 	bool CheckCredentials(User* user)
 	{
-													// 0     1             2
+													// 0     1
 		static std::string Query(std::string("SELECT a.id,a.show_name, "
+											// 2
 								 "(SELECT IF( perm!=0, 'perm', until ) FROM account_ban ab WHERE "
 		                         "a.id = ab.id AND "
-								 "(until > CURRENT_TIMESTAMP OR perm !=0) ORDER BY perm DESC , until DESC LIMIT 1) AS ban "
+								 "(until > CURRENT_TIMESTAMP OR perm !=0) ORDER BY perm DESC , until DESC LIMIT 1) AS ban,"
+											// 3
+								 "(SELECT org.name FROM ")+DynamicDB+std::string(".org_org org JOIN ")+
+								 DynamicDB+std::string(".org_member member ON member.org_id=org.id "
+								 "WHERE member.char_id=c.id) AS org "
 		                         "FROM account a JOIN ")+DynamicDB+std::string(".char_character c ON c.account=a.id "
 								 "WHERE a.login_name LIKE '?' AND a.pwd = '?' AND c.name LIKE '?'"));
 
@@ -174,6 +182,14 @@ public:
 							int Val=ConvToInt(Row[0].d.c_str());
 							user->Extend("ngmud_auth",&Val);
 							user->ChangeDisplayedHost(std::string(std::string(Row[1].d.c_str())+HostPostfix).c_str());
+							if(Row[3].null)
+							{
+								user->ChangeIdent(NoGuildIdent.c_str());
+							}
+							else
+							{
+								user->ChangeIdent(Row[3].d.c_str());
+							}
 						}
 					}
 					else
