@@ -112,7 +112,7 @@ public:
 		                         "a.id = ab.id AND "
 								 "(until > CURRENT_TIMESTAMP OR perm !=0) ORDER BY perm DESC , until DESC LIMIT 1) AS ban,"
 											// 3
-								 "(SELECT org.name FROM ")+DynamicDB+std::string(".org_org org JOIN ")+
+								 "(SELECT org.name FROM ")+DynamicDB+std::string(".org_organisation org JOIN ")+
 								 DynamicDB+std::string(".org_member member ON member.org_id=org.id "
 								 "WHERE member.char_id=c.id) AS org "
 		                         "FROM account a JOIN ")+DynamicDB+std::string(".char_character c ON c.account=a.id "
