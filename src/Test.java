@@ -23,7 +23,7 @@ public class Test {
 		CLog.Warning("Warnung-Test");
 		CLog.Error("Error-Test");
 		CLog.Force("Force-Test");
-		CLog.CustomForce("Custom-Force Testüüü");
+		CLog.CustomForce("Custom-Force TestÃ–Ã„Ãœ");
 		
 		GfxTest();
 		
