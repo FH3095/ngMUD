@@ -4,11 +4,14 @@ import ngmud.network.packets.*;
 import ngmud.network.*;
 import ngmud.util.CConfig;
 import ngmud.util.CPair;
+
+import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.util.LinkedList;
 import org.lwjgl.*;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.*;
+import chattest.ChatBot;
 
 import chattest.Server;
 
@@ -23,9 +26,9 @@ public class Test {
 		CLog.Warning("Warnung-Test");
 		CLog.Error("Error-Test");
 		CLog.Force("Force-Test");
-		CLog.CustomForce("Custom-Force TestÖÄÜ");
+		CLog.CustomForce("Custom-Force Testüüü");
 		
-		GfxTest();
+		//GfxTest();
 		
 		//CPacket.InitPackets("Test.ini");
 		CConfig Conf=new CConfig();
@@ -34,7 +37,27 @@ public class Test {
 		CPacket.InitPackets(Pair.GetFirst(),Pair.GetSecond());
 		Thread.currentThread().setPriority(Thread.MIN_PRIORITY+1);
 		
-		Server Serv=new Server();
+		ChatBot Bot=new ChatBot();
+		
+		try
+		{
+			Bot.setEncoding("UTF-8");
+        }
+        catch (UnsupportedEncodingException e) {
+	         System.out.println("Encoding not supported: " + e);
+        }
+        Bot.setVerbose(true);
+        try {
+        	Bot.connect("fhdev.ath.cx",3724);
+        }
+        catch(Exception e)
+        {
+        	CLog.Error(e.getMessage());
+        }
+        Bot.joinChannel("#FH");
+        
+		
+		/*Server Serv=new Server();
 		Serv.Run();
 		
 		CSocket Socket=new CSocket();
@@ -61,7 +84,7 @@ public class Test {
 			SendPack.SetSubType((short)Pack_Chat.SUB_TYPE.SAY.ordinal());
 			SendPack.SetData(SendPackData);
 			CLog.Warning(SendPack.Send() ? "Sending Data" : "Failure Sending Data");
-		}
+		}*/
 		
 		//CLog.UnInit();
 	}
