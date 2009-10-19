@@ -107,17 +107,18 @@ public:
 	{
 													// 0     1
 		static std::string Query(std::string("SELECT a.id,a.show_name, "
-											// 2
-								 "(SELECT IF( perm!=0, 'perm', until ) FROM account_ban ab WHERE "
-		                         "a.id = ab.id AND "
-								 "(until > CURRENT_TIMESTAMP OR perm !=0) ORDER BY perm DESC , until DESC LIMIT 1) AS ban,"
-											// 3
-								 "(SELECT org.name FROM ")+DynamicDB+std::string(".org_organisation org JOIN ")+
-								 DynamicDB+std::string(".org_member member ON member.org_id=org.id "
-								 "WHERE member.char_id=c.id) AS org "
-		                         "FROM account a JOIN ")+DynamicDB+std::string(".char_character c ON c.account=a.id "
-								 "WHERE a.login_name LIKE '?' AND a.pwd = '?' AND c.name LIKE '?'"));
-
+																	// 2
+											 "(SELECT CONCAT(IF(ab.perm!=0,'perm',ab.until),'$$',REPLACE(REPLACE(ab.reason,'\\n',' '),'\\r','')) FROM account_ban ab WHERE "
+											 "a.id = ab.id AND "
+											 "(ab.until > CURRENT_TIMESTAMP OR ab.perm !=0) ORDER BY ab.perm DESC , ab.until DESC LIMIT 1) AS ban, "
+														// 3
+											 "(SELECT org.name FROM ")+DynamicDB+
+											 std::string(".org_organisation org JOIN ")+
+											 DynamicDB+std::string(".char_org member ON member.org_id=org.id "
+											 "WHERE member.char_id=c.id) AS org "
+											 "FROM account a JOIN ")+DynamicDB+
+											 std::string(".char_character c ON c.account=a.id "
+											 "WHERE a.login_name LIKE '?' AND a.pwd='?' AND c.name LIKE '?'"));
 		/* Build the query */
 		SQLrequest req = SQLrequest(this, SQLprovider, DbId, (SQLquery(Query.c_str()),user->ident.c_str(),user->password.c_str(),user->nick.c_str()));
 
@@ -144,6 +145,40 @@ public:
 		}
 	}
 
+	virtual void ReplaceInBanReason(std::string& Str,const std::string& SqlResult)
+	{
+		if(SqlResult.size()<1)
+		{	return;	}
+		std::size_t ReasonPos=SqlResult.find("$$");
+		std::string Until;
+		std::string Reason;
+
+		if(std::string::npos==ReasonPos)
+		{
+			Until=SqlResult;
+			Reason="";
+		}
+		else
+		{
+			Until=SqlResult.substr(0,ReasonPos);
+			Reason=&((SqlResult.c_str())[ReasonPos+2]);
+		}
+
+
+
+		std::size_t Pos=Str.rfind("$u");
+		if(Pos!=std::string::npos && Until.size()!=0)
+		{
+			Str.replace(Pos,2,Until);
+		}
+
+		Pos=Str.rfind("$r");
+		if(Pos!=std::string::npos && Reason.size()!=0)
+		{
+			Str.replace(Pos,2,Reason);
+		}
+	}
+
 	virtual const char* OnRequest(Request* request)
 	{
 		if(strcmp(SQLRESID, request->GetId()) == 0)
@@ -162,18 +197,18 @@ public:
 						SQLfieldList& Row=res->GetRow();
 						if(!Row[2].null)
 						{
-							if(Row[2].d.compare("perm")==0)
+							static const std::string PermStr("perm");
+							if(PermStr.find(Row[2].d.c_str(),0,
+											(Row[2].d.size()<PermStr.size() ? Row[2].d.size() : PermStr.size()))==0)
 							{
-								ServerInstance->Users->QuitUser(user,PermBanKillReason);
+								std::string Reason(PermBanKillReason);
+								ReplaceInBanReason(Reason,Row[2].d);
+								ServerInstance->Users->QuitUser(user,Reason);
 							}
 							else
 							{
-								std::string Reason=TempBanKillReason;
-								unsigned int Pos=Reason.rfind("%t");
-								if(Pos!=std::string::npos)
-								{
-									Reason.replace(Pos,2,Row[2].d);
-								}
+								std::string Reason(TempBanKillReason);
+								ReplaceInBanReason(Reason,Row[2].d);
 								ServerInstance->Users->QuitUser(user,Reason);
 							}
 						}
