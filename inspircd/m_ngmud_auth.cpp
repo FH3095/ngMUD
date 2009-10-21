@@ -147,7 +147,7 @@ public:
 
 	virtual void ReplaceInBanReason(std::string& Str,const std::string& SqlResult)
 	{
-		if(SqlResult.size()<1)
+		if(SqlResult.c_str()==0)
 		{	return;	}
 		std::size_t Pos=SqlResult.find("$$");
 		std::string Until;
@@ -156,7 +156,7 @@ public:
 		if(std::string::npos==Pos)
 		{
 			Until=SqlResult;
-			Reason="";
+			Reason="<no reason>";
 		}
 		else
 		{
@@ -167,13 +167,13 @@ public:
 
 
 		Pos=Str.rfind("$u");
-		if(Pos!=std::string::npos && Until.size()!=0)
+		if(Pos!=std::string::npos)
 		{
 			Str.replace(Pos,2,Until);
 		}
 
 		Pos=Str.rfind("$r");
-		if(Pos!=std::string::npos && Reason.size()!=0)
+		if(Pos!=std::string::npos)
 		{
 			Str.replace(Pos,2,Reason);
 		}
