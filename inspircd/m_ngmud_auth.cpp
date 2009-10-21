@@ -30,6 +30,8 @@ class ModuleNgmudAuth : public Module
 	std::string TempBanKillReason;
 	std::string UnknownAccOrCharKillReason;
 	std::string ErrorKillReason;
+	
+	std::string NoBanReason;
 
 	std::string HostPostfix;
 	std::string NoAccHost;
@@ -82,6 +84,7 @@ public:
 		NoAccHost					= Conf.ReadValue("ngmud_auth", "noacchost",0);
 		DynamicDB					= Conf.ReadValue("ngmud_auth", "dynamicdb",0);
 		NoGuildIdent				= Conf.ReadValue("ngmud_auth", "noguildname",0);
+		NoBanReason					= Conf.ReadValue("ngmud_auth", "nobanreason",0);
 	}
 
 	virtual int OnUserRegister(User* user)
@@ -156,12 +159,16 @@ public:
 		if(std::string::npos==Pos)
 		{
 			Until=SqlResult;
-			Reason="<no reason>";
+			Reason="";
 		}
 		else
 		{
 			Until=SqlResult.substr(0,Pos);
 			Reason=&((SqlResult.c_str())[Pos+2]);
+		}
+		if(Reason.size()<1)
+		{
+			Reason=NoBanReason;
 		}
 
 
