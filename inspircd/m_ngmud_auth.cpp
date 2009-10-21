@@ -108,8 +108,8 @@ public:
 													// 0     1
 		static std::string Query(std::string("SELECT a.id,a.show_name, "
 																	// 2
-											 "(SELECT CONCAT(IF(ab.perm!=0,'perm',ab.until),'$$',REPLACE(REPLACE(ab.reason,'\\n',' '),'\\r','')) FROM account_ban ab WHERE "
-											 "a.id = ab.id AND "
+											 "(SELECT CONCAT(IF(ab.perm!=0,'perm',ab.until),'$$',REPLACE(REPLACE(ab.reason,'\\n',' '),'\\r','')) "
+											 "FROM account_ban ab WHERE a.id = ab.id AND "
 											 "(ab.until > CURRENT_TIMESTAMP OR ab.perm !=0) ORDER BY ab.perm DESC , ab.until DESC LIMIT 1) AS ban, "
 														// 3
 											 "(SELECT org.name FROM ")+DynamicDB+
@@ -118,7 +118,7 @@ public:
 											 "WHERE member.char_id=c.id) AS org "
 											 "FROM account a JOIN ")+DynamicDB+
 											 std::string(".char_character c ON c.account=a.id "
-											 "WHERE a.login_name LIKE '?' AND a.pwd='?' AND c.name LIKE '?'"));
+											 "WHERE a.login_name LIKE '?' AND a.pwd=SHA1('?') AND c.name LIKE '?'"));
 		/* Build the query */
 		SQLrequest req = SQLrequest(this, SQLprovider, DbId, (SQLquery(Query.c_str()),user->ident.c_str(),user->password.c_str(),user->nick.c_str()));
 
@@ -149,24 +149,24 @@ public:
 	{
 		if(SqlResult.size()<1)
 		{	return;	}
-		std::size_t ReasonPos=SqlResult.find("$$");
+		std::size_t Pos=SqlResult.find("$$");
 		std::string Until;
 		std::string Reason;
 
-		if(std::string::npos==ReasonPos)
+		if(std::string::npos==Pos)
 		{
 			Until=SqlResult;
 			Reason="";
 		}
 		else
 		{
-			Until=SqlResult.substr(0,ReasonPos);
-			Reason=&((SqlResult.c_str())[ReasonPos+2]);
+			Until=SqlResult.substr(0,Pos);
+			Reason=&((SqlResult.c_str())[Pos+2]);
 		}
 
 
 
-		std::size_t Pos=Str.rfind("$u");
+		Pos=Str.rfind("$u");
 		if(Pos!=std::string::npos && Until.size()!=0)
 		{
 			Str.replace(Pos,2,Until);
