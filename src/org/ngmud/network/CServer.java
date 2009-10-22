@@ -1,12 +1,13 @@
-package ngmud.network;
+package org.ngmud.network;
 
 import java.net.*;
-import ngmud.callback.CEvent;
-import ngmud.callback.CEventNotifier;
 import java.util.Vector;
 
-import ngmud.CLog;
-import ngmud.ngMUDException;
+import org.ngmud.CLog;
+import org.ngmud.ngMUDException;
+import org.ngmud.callback.CEvent;
+import org.ngmud.callback.CEventNotifier;
+
 
 
 

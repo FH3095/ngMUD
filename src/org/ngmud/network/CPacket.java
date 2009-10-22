@@ -1,10 +1,12 @@
-package ngmud.network;
+package org.ngmud.network;
 
 import java.io.*;
 import java.util.*;
-import ngmud.CLog;
-import ngmud.util.CHelper;
-import ngmud.network.packets.*;
+
+import org.ngmud.CLog;
+import org.ngmud.network.packets.*;
+import org.ngmud.util.CHelper;
+
 
 public class CPacket {
 	protected static final short HEADER_SIZE=6;

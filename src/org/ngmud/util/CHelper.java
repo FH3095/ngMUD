@@ -1,7 +1,8 @@
-package ngmud.util;
+package org.ngmud.util;
 
 import java.util.*;
-import ngmud.CLog;
+
+import org.ngmud.CLog;
 
 
 public abstract class CHelper {

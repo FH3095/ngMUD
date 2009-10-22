@@ -1,8 +1,9 @@
-package ngmud.network;
+package org.ngmud.network;
 
 import java.io.IOException;
 import java.net.*;
-import ngmud.ngMUDException;
+
+import org.ngmud.ngMUDException;
 
 
 public class CListenSocket{

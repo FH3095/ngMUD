@@ -1,4 +1,4 @@
-package ngmud.util;
+package org.ngmud.util;
 
 public class CPair<T,U> {
 	protected T First;

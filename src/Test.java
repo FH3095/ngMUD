@@ -1,9 +1,3 @@
-import ngmud.CLog;
-import ngmud.ngMUDException;
-import ngmud.network.packets.*;
-import ngmud.network.*;
-import ngmud.util.CConfig;
-import ngmud.util.CPair;
 
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
@@ -11,6 +5,13 @@ import java.util.LinkedList;
 import org.lwjgl.*;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.*;
+import org.ngmud.CLog;
+import org.ngmud.ngMUDException;
+import org.ngmud.network.*;
+import org.ngmud.network.packets.*;
+import org.ngmud.util.CConfig;
+import org.ngmud.util.CPair;
+
 import chattest.ChatBot;
 
 import chattest.Server;

@@ -1,8 +1,9 @@
-package ngmud.network;
+package org.ngmud.network;
 
 import java.net.*;
 import java.io.*;
-import ngmud.ngMUDException;
+
+import org.ngmud.ngMUDException;
 
 
 public class CSocket{
