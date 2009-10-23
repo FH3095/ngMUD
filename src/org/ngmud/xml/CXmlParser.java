@@ -1,5 +1,5 @@
 package org.ngmud.xml;
 
-public class CXmlParster {
+public class CXmlParser {
 
 }
