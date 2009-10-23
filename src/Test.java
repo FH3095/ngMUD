@@ -58,7 +58,7 @@ public class Test {
         //Bot.joinChannel("#FH");
         
         org.ngmud.xml.CXml Xml=new org.ngmud.xml.CXml();
-        Xml.LoadFile("Packets.xml");
+        Xml.LoadFile("Packets.xml",true);
         System.out.println(Xml.GetRootNode().toString());
 
 

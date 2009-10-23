@@ -16,7 +16,7 @@ public class CXmlNode {
 	private Hashtable<String,LinkedList<CXmlNode> > SubNodes;
 	private CXmlNode Parent;
 	
-	protected void Constructor()
+	public void ReConstruct()
 	{
 		Name=new String("");
 		Content=new String("");
@@ -26,12 +26,12 @@ public class CXmlNode {
 	
 	public CXmlNode()
 	{
-		Constructor();
+		ReConstruct();
 	}
 	
 	public CXmlNode(CXmlNode Parent,String Name)
 	{
-		Constructor();
+		ReConstruct();
 		this.Parent=Parent;
 		this.Name=Name;
 	}
@@ -163,6 +163,8 @@ public class CXmlNode {
 		Name=null;
 		Content=null;
 		Attribs.clear();
+		Attribs=null;
 		SubNodes.clear();
+		SubNodes=null;
 	}
 }

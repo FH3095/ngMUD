@@ -8,6 +8,17 @@ import org.xml.sax.helpers.DefaultHandler;
 public class CXmlParser extends DefaultHandler {
 	private CXmlNode Root;
 	private CXmlNode Current;
+	private boolean TrimContent;
+	
+	public CXmlParser()
+	{
+		TrimContent=false;
+	}
+	
+	public void SetTrimContent(boolean TrimContent)
+	{
+		this.TrimContent=TrimContent;
+	}
 
 	public CXmlNode GetRootNode()
 	{	return Root;	}
@@ -60,6 +71,9 @@ public class CXmlParser extends DefaultHandler {
 	public void characters( char[] buf, int offset, int len )
 	throws SAXException
 	{
-		Current.SetContent(new String(buf,offset,len));
+		String Content=new String(buf,offset,len);
+		if(TrimContent)
+		{	Content=Content.trim();	}
+		Current.SetContent(Content);
 	}
 }

@@ -13,11 +13,12 @@ public class CXml {
 		return RootNode;
 	}
 
-	public boolean LoadFile(String File)
+	public boolean LoadFile(String File,boolean TrimContent)
 	{
 		FileName=new String("");
 		RootNode=null;
 		CXmlParser Handler = new CXmlParser();
+		Handler.SetTrimContent(TrimContent);
 		try {
 			SAXParser Parser = SAXParserFactory.newInstance().newSAXParser();
 			Parser.parse(new java.io.File(File), Handler);
