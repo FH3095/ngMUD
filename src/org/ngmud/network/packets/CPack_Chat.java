@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.ngmud.network.CPacketHelper;
 import org.ngmud.network.CSocket;
 
-public class Pack_Chat extends SubPacket {
+public class CPack_Chat extends CSubPacket {
 	public static final short PACK_NUM = 1;
 	public long From;
 	public byte Content[];

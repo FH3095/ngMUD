@@ -47,7 +47,7 @@ public class Server {
 						CLog.Warning("New Data!");
 						if(Packs[i].Recv()==CPacket.RECIEVED.ALL)
 						{
-							((Pack_Chat)Packs[i].GetData()).From=i;
+							((CPack_Chat)Packs[i].GetData()).From=i;
 							for(int j=0;j<MAX_CONS;j++)
 							{
 								Packs[i].Send(Packs[j].GetSock());

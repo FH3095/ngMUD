@@ -13,7 +13,7 @@ public class CPacket {
 	protected short Type;
 	protected short SubType;
 	protected short Size;
-	protected SubPacket Data;
+	protected CSubPacket Data;
 	protected boolean HeaderOK;
 	protected boolean DataOK;
 	protected CSocket Sock;
@@ -139,7 +139,7 @@ public class CPacket {
 		return -1;
 	}
 	
-	public SubPacket GetData()
+	public CSubPacket GetData()
 	{
 		if(DataOK && Sock!=null)
 		{
@@ -165,13 +165,13 @@ public class CPacket {
 		return Type!=-1 && SubType!=-1;
 	}
 	
-	public void SetData(SubPacket Data)
+	public void SetData(CSubPacket Data)
 	{
 		this.Data=Data;
 		DataOK=true;
 	}
 	
-	public void MakePacket(short Type,short SubType,SubPacket Data)
+	public void MakePacket(short Type,short SubType,CSubPacket Data)
 	{
 		this.Type=Type;
 		this.SubType=SubType;
@@ -198,9 +198,9 @@ public class CPacket {
 					Class<?> C=CHelper.FindClass("ngmud.network.packets.",ClassName,true);
 					if(C!=null)
 					{
-						SubPacket Pack=null;
+						CSubPacket Pack=null;
 						try {
-							Pack=(SubPacket)C.newInstance();
+							Pack=(CSubPacket)C.newInstance();
 						}
 						catch(Exception e)
 						{
@@ -242,7 +242,7 @@ public class CPacket {
 		return true;
 	}
 	
-	public static SubPacket GetNewPacket(int Type)
+	public static CSubPacket GetNewPacket(int Type)
 	{
 		if(PacketTypes==null)
 		{	return null;	}
@@ -251,7 +251,7 @@ public class CPacket {
 		if(C!=null)
 		{
 			try {
-				return (SubPacket)(C.newInstance());
+				return (CSubPacket)(C.newInstance());
 			}
 			catch(Exception e)
 			{
