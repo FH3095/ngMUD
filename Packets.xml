@@ -2,5 +2,6 @@
 <properties>
 <comment>T</comment>
 <entry key="Pack_Chat">1</entry>
-<entry key="SubPacket">0</entry>
+<entry key="SubPacket" value="">0</entry>
+<entry2 Key="Sub" />
 </properties>

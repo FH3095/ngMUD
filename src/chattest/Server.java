@@ -1,7 +1,6 @@
 package chattest;
 
 import java.net.InetSocketAddress;
-import org.ngmud.*;
 import java.util.*;
 
 import org.ngmud.CLog;

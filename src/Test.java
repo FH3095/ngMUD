@@ -49,15 +49,19 @@ public class Test {
         }
         Bot.setVerbose(true);
         try {
-        	Bot.connect("fhdev.ath.cx",3724);
+        	//Bot.connect("fhdev.ath.cx",3724);
         }
         catch(Exception e)
         {
         	CLog.Error(e.getMessage());
         }
-        Bot.joinChannel("#FH");
+        //Bot.joinChannel("#FH");
         
-		
+        org.ngmud.xml.CXml Xml=new org.ngmud.xml.CXml();
+        Xml.LoadFile("Packets.xml");
+        System.out.println(Xml.GetRootNode().toString());
+
+
 		/*Server Serv=new Server();
 		Serv.Run();
 		

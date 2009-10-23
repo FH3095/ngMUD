@@ -195,7 +195,7 @@ public class CPacket {
 			try {
 				if(Integer.parseInt(VIt.next())==1)
 				{
-					Class<?> C=CHelper.FindClass("ngmud.network.packets.",ClassName,true);
+					Class<?> C=CHelper.FindClass("org.ngmud.network.packets.",ClassName,true);
 					if(C!=null)
 					{
 						CSubPacket Pack=null;
