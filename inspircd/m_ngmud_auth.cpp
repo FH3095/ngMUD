@@ -18,6 +18,37 @@
 /* $ModDesc: Allow/Deny connections based upon ngMUD accounts */
 /* $ModDep: m_sqlv2.h m_sqlutils.h */
 
+class CommandNgmudUserID : public Command
+{
+public:
+	CommandNgmudUserID(InspIRCd* Instance) : Command(Instance,"NGMUD_AUTHID", "o", 1, 1, false, 0)
+	{
+		this->source = "m_ngmud_auth.so";
+		syntax = "<target>";
+	}
+
+	CmdResult Handle (const std::vector<std::string>& parameters, User *user)
+	{
+		User* dest = ServerInstance->FindNick(parameters[0]);
+		if(dest && IS_LOCAL(dest))
+		{
+			int* Val;
+			if(dest->GetExt(std::string("ngmud_auth"),Val))
+			{
+				user->WriteNumeric(304, "%s:NGMUD_AUTHID AuthID is %i",user->nick.c_str(),*Val);
+			}
+			else
+			{
+				user->WriteNumeric(304, "%s:NGMUD_AUTHID No AuthID",user->nick.c_str());
+			}
+			return CMD_LOCALONLY;
+		}
+		return CMD_FAILURE;
+	}
+};
+
+
+
 class ModuleNgmudAuth : public Module
 {
 	Module* SQLutils;
@@ -30,7 +61,7 @@ class ModuleNgmudAuth : public Module
 	std::string TempBanKillReason;
 	std::string UnknownAccOrCharKillReason;
 	std::string ErrorKillReason;
-	
+
 	std::string NoBanReason;
 
 	std::string HostPostfix;
@@ -46,6 +77,9 @@ public:
 	ModuleNgmudAuth(InspIRCd* Me)
 	: Module(Me)
 	{
+		CommandNgmudUserID*	mycommand = new CommandNgmudUserID(ServerInstance);
+		ServerInstance->AddCommand(mycommand);
+
 		ServerInstance->Modules->UseInterface("SQLutils");
 		ServerInstance->Modules->UseInterface("SQL");
 
@@ -92,7 +126,7 @@ public:
 		if (!AllowAccPattern.empty()  && InspIRCd::Match(user->ident,AllowAccPattern) &&
 		    !AllowNickPattern.empty() && InspIRCd::Match(user->nick,AllowNickPattern))
 		{
-			static int Val=0;
+			const static int Val=0;
 			user->Extend("ngmud_auth",&Val);
 			user->ChangeDisplayedHost(NoAccHost.c_str());
 			return 0;
@@ -221,8 +255,9 @@ public:
 						}
 						else
 						{
-							int Val=ConvToInt(Row[0].d.c_str());
-							user->Extend("ngmud_auth",&Val);
+							int *Val=new int;
+							*Val=ConvToInt(Row[0].d.c_str());
+							user->Extend("ngmud_auth",Val);
 							user->ChangeDisplayedHost(std::string(std::string(Row[1].d.c_str())+HostPostfix).c_str());
 							if(Row[3].null)
 							{
@@ -260,7 +295,13 @@ public:
 
 	virtual void OnUserDisconnect(User* user)
 	{
+		int* Val;
+		user->GetExt("ngmud_auth",Val);
 		user->Shrink("ngmud_auth");
+		if(Val && *Val)
+		{
+			delete Val;
+		}
 	}
 
 	virtual bool OnCheckReady(User* user)
