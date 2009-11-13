@@ -67,7 +67,7 @@ public class CPacketMgr {
 						if(PackNum!=0)
 						{
 							PacketTypes.put(PackNum, C);
-							CLog.Debug("New class found: "+C.getName()+" PACK_NUM: "+PackNum);
+							CLog.Debug("New class found: "+C.getName()+" ; PACK_NUM: "+PackNum);
 						}
 					}
 				}
