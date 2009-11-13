@@ -1,12 +1,12 @@
-package chattest;
+package de.ngmud.tests;
 
 import java.net.InetSocketAddress;
 import java.util.*;
 
-import org.ngmud.CLog;
-import org.ngmud.ngMUDException;
-import org.ngmud.network.*;
-import org.ngmud.network.packets.*;
+import de.ngmud.CLog;
+import de.ngmud.ngMUDException;
+import de.ngmud.network.*;
+import de.ngmud.network.packets.*;
 
 public class Server {
 	static final int MAX_CONS=5;

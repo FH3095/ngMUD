@@ -1,4 +1,4 @@
-package chattest;
+package de.ngmud.tests;
 
 import org.jibble.pircbot.*;
 

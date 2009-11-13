@@ -1,9 +1,9 @@
-package org.ngmud.network.packets;
+package de.ngmud.network.packets;
 
 import java.io.IOException;
 
-import org.ngmud.network.CPacketHelper;
-import org.ngmud.network.CSocket;
+import de.ngmud.network.CPacketHelper;
+import de.ngmud.network.CSocket;
 
 public class CPack_Chat extends CSubPacket {
 	public static final short PACK_NUM = 1;

@@ -1,9 +1,9 @@
-package org.ngmud.util;
+package de.ngmud.util;
 
 import java.io.*;
 import java.util.*;
 
-import org.ngmud.CLog;
+import de.ngmud.CLog;
 
 public class CConfig {
 	protected Properties Conf=null;

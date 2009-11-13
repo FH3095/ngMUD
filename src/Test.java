@@ -5,16 +5,16 @@ import java.util.LinkedList;
 import org.lwjgl.*;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.*;
-import org.ngmud.CLog;
-import org.ngmud.ngMUDException;
-import org.ngmud.network.*;
-import org.ngmud.network.packets.*;
-import org.ngmud.util.CConfig;
-import org.ngmud.util.CPair;
 
-import chattest.ChatBot;
 
-import chattest.Server;
+import de.ngmud.CLog;
+import de.ngmud.ngMUDException;
+import de.ngmud.network.*;
+import de.ngmud.network.packets.*;
+import de.ngmud.tests.ChatBot;
+import de.ngmud.tests.Server;
+import de.ngmud.util.CConfig;
+import de.ngmud.util.CPair;
 
 public class Test {
 	public static void main(String[] args) throws ngMUDException { // Test-main-Func
@@ -35,7 +35,7 @@ public class Test {
 		CConfig Conf=new CConfig();
 		Conf.Init("Packets.ini",false);
 		CPair<LinkedList<String>,LinkedList<String>> Pair=Conf.GetKeysAndValuesSeperate();
-		CPacket.InitPackets(Pair.GetFirst(),Pair.GetSecond());
+		CPacket.InitPackets("org.ngmud.network.packets.",Pair.GetFirst(),Pair.GetSecond());
 		Thread.currentThread().setPriority(Thread.MIN_PRIORITY+1);
 		
 		ChatBot Bot=new ChatBot();
@@ -57,7 +57,7 @@ public class Test {
         }
         //Bot.joinChannel("#FH");
         
-        org.ngmud.xml.CXml Xml=new org.ngmud.xml.CXml();
+        de.ngmud.xml.CXml Xml=new de.ngmud.xml.CXml();
         Xml.LoadFile("Packets.xml",true);
         System.out.println(Xml.GetRootNode().toString());
 

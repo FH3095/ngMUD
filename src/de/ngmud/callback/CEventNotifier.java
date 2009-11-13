@@ -1,4 +1,4 @@
-package org.ngmud.callback;
+package de.ngmud.callback;
 
 public class CEventNotifier<T> {
 	private CEvent<T> Event;

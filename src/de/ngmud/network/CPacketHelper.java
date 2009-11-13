@@ -1,5 +1,5 @@
 
-package org.ngmud.network;
+package de.ngmud.network;
 
 import java.nio.charset.Charset;
 import java.io.IOException;

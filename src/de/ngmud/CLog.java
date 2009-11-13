@@ -1,8 +1,8 @@
-package org.ngmud;
+package de.ngmud;
 
 import java.io.*;
 
-import org.ngmud.ngMUDException;
+import de.ngmud.ngMUDException;
 
 public class CLog {
 	public enum LOG_LEVEL {

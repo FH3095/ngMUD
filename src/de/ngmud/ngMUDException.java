@@ -1,4 +1,4 @@
-package org.ngmud;
+package de.ngmud;
 
 public class ngMUDException extends Exception {
 	private static final long serialVersionUID = 1L; // First version

@@ -1,6 +1,6 @@
-package org.ngmud.network.packets;
+package de.ngmud.network.packets;
 
-import org.ngmud.network.CSocket;
+import de.ngmud.network.CSocket;
 
 public abstract class CSubPacket {
 	public static final short PACK_NUM=0;

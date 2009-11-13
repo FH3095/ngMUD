@@ -1,11 +1,11 @@
-package org.ngmud.network;
+package de.ngmud.network;
 
 import java.io.*;
 import java.util.*;
 
-import org.ngmud.CLog;
-import org.ngmud.network.packets.*;
-import org.ngmud.util.CHelper;
+import de.ngmud.CLog;
+import de.ngmud.network.packets.*;
+import de.ngmud.util.CHelper;
 
 
 public class CPacket {
@@ -184,7 +184,7 @@ public class CPacket {
 	
 	protected static TreeMap<Short,Class<?> > PacketTypes=null;
 	
-	public static boolean InitPackets(LinkedList<String> Classes,LinkedList<String> Values)
+	public static boolean InitPackets(String BasePacket,LinkedList<String> Classes,LinkedList<String> Values)
 	{
 		PacketTypes=new TreeMap<Short,Class<?> >();
 		Iterator<String> CIt=Classes.iterator();
@@ -195,7 +195,7 @@ public class CPacket {
 			try {
 				if(Integer.parseInt(VIt.next())==1)
 				{
-					Class<?> C=CHelper.FindClass("org.ngmud.network.packets.",ClassName,true);
+					Class<?> C=CHelper.FindClass(BasePacket,ClassName,true);
 					if(C!=null)
 					{
 						CSubPacket Pack=null;
