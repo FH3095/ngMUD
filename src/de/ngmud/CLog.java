@@ -4,7 +4,7 @@ import java.io.*;
 
 import de.ngmud.ngMUDException;
 
-public class CLog {
+public class CLog extends Thread {
 	public enum LOG_LEVEL {
 		CUSTOM_FORCE(-2,"Custom Force"),
 		FORCE(-1,"Force"),
@@ -41,10 +41,51 @@ public class CLog {
 	static protected String Filename="";
 	static protected LOG_LEVEL LogLevel;
 	static protected int CustomLogLevel;
+	
+	static private String TxtBuffer="",HtmlBuffer="";
+	static private Thread MainThread;
+	static private Object Mutex;
+	
+	private CLog()	{}
 
 	static public boolean IsInited()
 	{
 		return Inited;
+	}
+	
+	public void run()
+	{
+		while(MainThread.isAlive())
+		{
+			synchronized(Mutex)
+			{
+				try {
+					Mutex.wait(10000);
+				}
+				catch(InterruptedException e) {}
+				if(!TxtBuffer.isEmpty())
+				{
+					System.out.println(TxtBuffer);
+					System.out.flush();
+					try {
+						TxtOut.writeBytes(TxtBuffer);
+						TxtOut.flush();
+					}
+					catch(IOException e) {}
+					TxtBuffer="";
+				}
+				if(!HtmlBuffer.isEmpty())
+				{
+					try {
+						HtmlOut.writeBytes(HtmlBuffer);
+						HtmlOut.flush();
+					}
+					catch(IOException e) {}
+					HtmlBuffer="";
+				}
+			}
+		}
+		UnInit();
 	}
 	
 	static public void Init(String Filename,boolean Overwrite,LOG_LEVEL LogLevel,int CustomLogLevel) throws ngMUDException
@@ -81,6 +122,12 @@ public class CLog {
 		CLog.Filename=Filename;
 		CLog.LogLevel=LogLevel;
 		CLog.CustomLogLevel=CustomLogLevel;
+		
+		Mutex=new Object();
+		
+		CLog Log=new CLog();
+		Log.start();
+		MainThread=Thread.currentThread();
 	}
 	
 	static protected String GetClassMethod()
@@ -94,8 +141,7 @@ public class CLog {
 		if(LOG_LEVEL.ERROR.GetNum()<=CLog.LogLevel.GetNum())
 		{
 			String ClassMethod=GetClassMethod();
-			OutHtml(LOG_LEVEL.ERROR,LOG_LEVEL.ERROR.GetNum(),ClassMethod,Text);
-			OutTxt("ERROR: "+ClassMethod+": "+Text);
+			Out(LOG_LEVEL.ERROR,LOG_LEVEL.ERROR.GetNum(),ClassMethod,Text);
 		}
 	}
 	
@@ -104,8 +150,7 @@ public class CLog {
 		if(LOG_LEVEL.WARNING.GetNum()<=CLog.LogLevel.GetNum())
 		{
 			String ClassMethod=GetClassMethod();
-			OutHtml(LOG_LEVEL.WARNING,LOG_LEVEL.WARNING.GetNum(),ClassMethod,Text);
-			OutTxt("WARNING: "+ClassMethod+": "+Text);
+			Out(LOG_LEVEL.WARNING,LOG_LEVEL.WARNING.GetNum(),ClassMethod,Text);
 		}
 	}
 	
@@ -114,8 +159,7 @@ public class CLog {
 		if(LOG_LEVEL.INFO.GetNum()<=CLog.LogLevel.GetNum())
 		{
 			String ClassMethod=GetClassMethod();
-			OutHtml(LOG_LEVEL.INFO,LOG_LEVEL.INFO.GetNum(),ClassMethod,Text);
-			OutTxt("INFO: "+ClassMethod+": "+Text);
+			Out(LOG_LEVEL.INFO,LOG_LEVEL.INFO.GetNum(),ClassMethod,Text);
 		}
 	}
 	
@@ -124,8 +168,7 @@ public class CLog {
 		if(LOG_LEVEL.DEBUG.GetNum()<=CLog.LogLevel.GetNum())
 		{
 			String ClassMethod=GetClassMethod();
-			OutHtml(LOG_LEVEL.DEBUG,LOG_LEVEL.DEBUG.GetNum(),ClassMethod,Text);
-			OutTxt("DEBUG: "+ClassMethod+": "+Text);
+			Out(LOG_LEVEL.DEBUG,LOG_LEVEL.DEBUG.GetNum(),ClassMethod,Text);
 		}
 	}
 	
@@ -135,8 +178,7 @@ public class CLog {
 		   LOG_LEVEL.ONLY_CUSTOM.GetNum()==CLog.LogLevel.GetNum())
 		{
 			String ClassMethod=GetClassMethod();
-			OutTxt("CUSTOM: "+ClassMethod+": "+Text);
-			OutHtml(LOG_LEVEL.CUSTOM_FORCE,-1,ClassMethod,Text);
+			Out(LOG_LEVEL.CUSTOM_FORCE,-1,ClassMethod,Text);
 		}
 	}
 	
@@ -147,40 +189,28 @@ public class CLog {
 		   Level<=CLog.CustomLogLevel)
 		{
 			String ClassMethod=GetClassMethod();
-			OutHtml(LOG_LEVEL.CUSTOM,Level,ClassMethod,Text);
-			OutTxt("CUSTOM: "+ClassMethod+": "+Text);
+			Out(LOG_LEVEL.CUSTOM,Level,ClassMethod,Text);
 		}
 	}
 	
 	static public void Force(String Text)
 	{
 		String ClassMethod=GetClassMethod();
-		OutHtml(LOG_LEVEL.FORCE,-1,ClassMethod,Text);
-		OutTxt(ClassMethod+": "+Text);
+		Out(LOG_LEVEL.FORCE,-1,ClassMethod,Text);
 	}
 	
-	static public void OutTxt(String Text)
+	static private void Out(LOG_LEVEL Type,int Level,String Method,String Text)
 	{
-		System.out.println(Text);
-		System.out.flush();
-		try {
-			TxtOut.writeBytes(Text+"\r\n");
-			TxtOut.flush();
+		synchronized(Mutex)
+		{
+			TxtBuffer+=Method+": "+Text+"\n";
+			HtmlBuffer+="<tr><td>"+Type.GetHtmlText()+"</td><td>"+Level+"</td><td>"+
+	    	Method+"</td><td>"+Text+"</td></tr>\n";
+			Mutex.notifyAll();
 		}
-		catch(IOException e) {}
 	}
 	
-	static public void OutHtml(LOG_LEVEL Type,int Level,String Method,String Text)
-	{
-		try {
-			HtmlOut.writeBytes("<tr><td>"+Type.GetHtmlText()+"</td><td>"+Level+"</td><td>"+
-			                   Method+"</td><td>"+Text+"</td></tr>\n");
-			HtmlOut.flush();
-		}
-		catch(IOException e) {}
-	}
-	
-	static public void UnInit()
+	public void UnInit()
 	{
 		if(TxtOut!=null)
 		{
