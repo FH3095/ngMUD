@@ -1,3 +1,4 @@
+package de.ngmud.tests;
 
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
@@ -11,13 +12,11 @@ import de.ngmud.CLog;
 import de.ngmud.ngMUDException;
 import de.ngmud.network.*;
 import de.ngmud.network.packets.*;
-import de.ngmud.tests.ChatBot;
-import de.ngmud.tests.Server;
 import de.ngmud.util.CConfig;
 import de.ngmud.util.CPair;
 
-public class Test {
-	public static void main(String[] args) throws ngMUDException { // Test-main-Func
+public class OldTest extends TestBase {
+	public void Main(String[] args) throws ngMUDException {
 		CLog.Init("",true,CLog.LOG_LEVEL.CUSTOM,(short)5);
 		CLog.Info("Log initialized successfull :D");
 		CLog.Custom("Custom-Test Level 1", 1);
@@ -35,7 +34,7 @@ public class Test {
 		CConfig Conf=new CConfig();
 		Conf.Init("Packets.ini",false);
 		CPair<LinkedList<String>,LinkedList<String>> Pair=Conf.GetKeysAndValuesSeperate();
-		CPacket.InitPackets("org.ngmud.network.packets.",Pair.GetFirst(),Pair.GetSecond());
+		CPacket.InitPackets("de.ngmud.network.packets.",Pair.GetFirst(),Pair.GetSecond());
 		Thread.currentThread().setPriority(Thread.MIN_PRIORITY+1);
 		
 		ChatBot Bot=new ChatBot();
@@ -58,7 +57,7 @@ public class Test {
         //Bot.joinChannel("#FH");
         
         de.ngmud.xml.CXml Xml=new de.ngmud.xml.CXml();
-        Xml.LoadFile("Packets.xml",true);
+        Xml.LoadFile("config.xml",true);
         System.out.println(Xml.GetRootNode().toString());
 
 
