@@ -1,19 +1,13 @@
 package de.ngmud.tests;
 
 import java.io.UnsupportedEncodingException;
-import java.net.InetSocketAddress;
-import java.util.LinkedList;
 import org.lwjgl.*;
-import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.*;
-
 
 import de.ngmud.CLog;
 import de.ngmud.ngMUDException;
 import de.ngmud.network.*;
-import de.ngmud.network.packets.*;
-import de.ngmud.util.CConfig;
-import de.ngmud.util.CPair;
+import de.ngmud.xml.*;
 
 public class OldTest extends TestBase {
 	public void Main(String[] args) throws ngMUDException {
@@ -30,11 +24,11 @@ public class OldTest extends TestBase {
 		
 		//GfxTest();
 		
-		//CPacket.InitPackets("Test.ini");
-		CConfig Conf=new CConfig();
-		Conf.Init("Packets.ini",false);
-		CPair<LinkedList<String>,LinkedList<String>> Pair=Conf.GetKeysAndValuesSeperate();
-		CPacket.InitPackets("de.ngmud.network.packets.",Pair.GetFirst(),Pair.GetSecond());
+		CXml ConfigFile=new CXml();
+		ConfigFile.LoadFile("config.xml",false);
+		CXmlNode Config=ConfigFile.GetRootNode().GetSubNodes("config").peekFirst();
+		System.out.println(Config.toString());
+		CPacketMgr.InitPackets("de.ngmud.network.packets.",Config.GetSubNodes("packets").peekFirst());
 		Thread.currentThread().setPriority(Thread.MIN_PRIORITY+1);
 		
 		ChatBot Bot=new ChatBot();
@@ -55,10 +49,6 @@ public class OldTest extends TestBase {
         	CLog.Error(e.getMessage());
         }
         //Bot.joinChannel("#FH");
-        
-        de.ngmud.xml.CXml Xml=new de.ngmud.xml.CXml();
-        Xml.LoadFile("config.xml",true);
-        System.out.println(Xml.GetRootNode().toString());
 
 
 		/*Server Serv=new Server();

@@ -1,11 +1,8 @@
 package de.ngmud.network;
 
 import java.io.*;
-import java.util.*;
 
-import de.ngmud.CLog;
 import de.ngmud.network.packets.*;
-import de.ngmud.util.CHelper;
 
 
 public class CPacket {
@@ -68,7 +65,7 @@ public class CPacket {
 				catch(IOException e)
 				{	return RECIEVED.ERROR;	}
 				HeaderOK=true;
-				Data=GetNewPacket(Type);
+				Data=CPacketMgr.GetNewPacket(Type);
 				Ret=RECIEVED.HEADER;
 			}
 		}
@@ -180,85 +177,5 @@ public class CPacket {
 	
 	public enum RECIEVED {
 		ERROR,NOTHING,HEADER,ALL
-	}
-	
-	protected static TreeMap<Short,Class<?> > PacketTypes=null;
-	
-	public static boolean InitPackets(String BasePacket,LinkedList<String> Classes,LinkedList<String> Values)
-	{
-		PacketTypes=new TreeMap<Short,Class<?> >();
-		Iterator<String> CIt=Classes.iterator();
-		Iterator<String> VIt=Values.iterator();
-		while(CIt.hasNext())
-		{
-			String ClassName=CIt.next();
-			try {
-				if(Integer.parseInt(VIt.next())==1)
-				{
-					Class<?> C=CHelper.FindClass(BasePacket,ClassName,true);
-					if(C!=null)
-					{
-						CSubPacket Pack=null;
-						try {
-							Pack=(CSubPacket)C.newInstance();
-						}
-						catch(Exception e)
-						{
-							CLog.Error("Can't create instance from "+C.getName()+
-							           " for unknown reason.");
-							continue;
-						}
-						if(Pack==null)
-						{
-							CLog.Error("Instance from "+C.getName()+
-							           " wasn't created for unknown reason.");
-							continue;
-						}
-						short PackNum=0;
-						try {
-							PackNum=C.getField("PACK_NUM").getShort(Pack);
-						}
-						catch(IllegalAccessException e)
-						{
-							CLog.Error("Can't access PACK_NUM in "+C.getName());
-							continue;
-						}
-						catch(NoSuchFieldException e)
-						{
-							CLog.Error("Class "+C.getName()+" hasn't a field called PACK_NUM.");
-							continue;
-						}
-						if(PackNum!=0)
-						{
-							PacketTypes.put(PackNum, C);
-						}
-					}
-				}
-			}
-			catch(NumberFormatException e) {}
-		}
-		
-		
-		return true;
-	}
-	
-	public static CSubPacket GetNewPacket(int Type)
-	{
-		if(PacketTypes==null)
-		{	return null;	}
-		
-		Class<?> C=PacketTypes.get(Type);
-		if(C!=null)
-		{
-			try {
-				return (CSubPacket)(C.newInstance());
-			}
-			catch(Exception e)
-			{
-				CLog.Error("Can't create instance from class "+C.getName()+".");
-				return null;
-			}
-		}
-		return null;
 	}
 }
