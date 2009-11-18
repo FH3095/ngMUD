@@ -11,7 +11,6 @@ import de.ngmud.xml.*;
 
 public class OldTest extends TestBase {
 	public void Main(String[] args) throws ngMUDException {
-		CLog.Init("",true,CLog.LOG_LEVEL.CUSTOM,(short)5);
 		CLog.Info("Log initialized successfull :D");
 		CLog.Custom("Custom-Test Level 1", 1);
 		CLog.Custom("Custom-Text Level 6", 6);

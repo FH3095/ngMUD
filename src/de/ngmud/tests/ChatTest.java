@@ -21,5 +21,9 @@ public class ChatTest extends TestBase {
 		};
 		Input.addActionListener(InputListener);
 		Test2.getSendButton().addActionListener(InputListener);
+		de.ngmud.network.chat.ClientChat Chat=new de.ngmud.network.chat.ClientChat();
+		Chat.setVerbose(true);
+		Chat.setLoginData("FH", "FH", "FH");
+		Chat.connectToServer("fhdev.ath.cx", 3724);
 	}
 }
