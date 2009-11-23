@@ -27,7 +27,7 @@ public class OldTest extends TestBase {
 		ConfigFile.LoadFile("config.xml",false);
 		CXmlNode Config=ConfigFile.GetRootNode().GetSubNodes("config").peekFirst();
 		CLog.Debug(Config.toString());
-		CPacketMgr.InitPackets("de.ngmud.network.packets.",Config.GetSubNodes("packets").peekFirst());
+		CPacketMgr.InitPackets(Config.GetSubNodes("packets").peekFirst());
 		Thread.currentThread().setPriority(Thread.MIN_PRIORITY+1);
 		
 		ChatBot Bot=new ChatBot();

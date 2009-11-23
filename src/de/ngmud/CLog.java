@@ -2,7 +2,6 @@ package de.ngmud;
 
 import java.io.*;
 
-import de.ngmud.ngMUDException;
 
 public class CLog extends Thread {
 	public enum LOG_LEVEL {
@@ -66,10 +65,8 @@ public class CLog extends Thread {
 				if(!TxtBuffer.isEmpty())
 				{
 					System.out.println(TxtBuffer);
-					System.out.flush();
 					try {
 						TxtOut.writeBytes(TxtBuffer);
-						TxtOut.flush();
 					}
 					catch(IOException e) {}
 					TxtBuffer="";
@@ -78,12 +75,18 @@ public class CLog extends Thread {
 				{
 					try {
 						HtmlOut.writeBytes(HtmlBuffer);
-						HtmlOut.flush();
 					}
 					catch(IOException e) {}
 					HtmlBuffer="";
 				}
 			}
+			try {
+				System.out.flush();
+				TxtOut.flush();
+				HtmlOut.flush();
+			}
+			catch(IOException e)
+			{}
 		}
 		UnInit();
 	}
@@ -201,11 +204,14 @@ public class CLog extends Thread {
 	
 	static private void Out(LOG_LEVEL Type,int Level,String Method,String Text)
 	{
+		String HtmlText=Text;
+		HtmlText=HtmlText.replace("<", "&lt;");
+		HtmlText=HtmlText.replace(">", "&gt;");
 		synchronized(Mutex)
 		{
 			TxtBuffer+=Method+": "+Text+"\n";
 			HtmlBuffer+="<tr><td>"+Type.GetHtmlText()+"</td><td>"+Level+"</td><td>"+
-	    	Method+"</td><td>"+Text+"</td></tr>\n";
+	    	Method+"</td><td>"+HtmlText+"</td></tr>\n";
 			Mutex.notifyAll();
 		}
 	}

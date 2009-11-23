@@ -10,13 +10,22 @@ import de.ngmud.xml.CXmlNode;
 public class CPacketMgr {
 	protected static TreeMap<Short,Class<?> > PacketTypes=null;
 	
-	public static boolean InitPackets(String BasePacket,CXmlNode Classes)
+	public static boolean InitPackets(CXmlNode Classes)
 	{
-		PacketTypes=new TreeMap<Short,Class<?> >();
-		Enumeration<LinkedList<CXmlNode>> ClassEnum=Classes.GetSubNodes().elements();
-		while(ClassEnum.hasMoreElements())
+		String BasePacket;
+		BasePacket=Classes.GetAttributes().get("package");
+		if(BasePacket==null || BasePacket=="")
 		{
-			CXmlNode Class=ClassEnum.nextElement().peekFirst();
+			CLog.Error("No package given for the network-packets in config.");
+			return false;
+		}
+		BasePacket+=".";
+		
+		PacketTypes=new TreeMap<Short,Class<?> >();
+		Iterator<LinkedList<CXmlNode>> ClassIt=Classes.GetSubNodes().values().iterator();
+		while(ClassIt.hasNext())
+		{
+			CXmlNode Class=ClassIt.next().peekFirst();
 			String ClassName=Class.GetName();
 			int ClassValue;
 			try {

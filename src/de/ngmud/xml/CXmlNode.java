@@ -1,27 +1,24 @@
 package de.ngmud.xml;
 
-import java.util.Hashtable;
-import java.util.Enumeration;
-import java.util.Set;
-import java.util.Iterator;
 import java.util.Map;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.ListIterator;
 
 public class CXmlNode {
 
 	private String Name;
 	private String Content;
-	private Hashtable<String,String> Attribs;
-	private Hashtable<String,LinkedList<CXmlNode> > SubNodes;
+	private Map<String,String> Attribs;
+	private Map<String,LinkedList<CXmlNode> > SubNodes;
 	private CXmlNode Parent;
 	
 	public void ReConstruct()
 	{
 		Name=new String("");
 		Content=new String("");
-		Attribs=new Hashtable<String,String>();
-		SubNodes=new Hashtable<String,LinkedList<CXmlNode> >();
+		Attribs=new HashMap<String,String>();
+		SubNodes=new HashMap<String,LinkedList<CXmlNode> >();
 	}
 	
 	public CXmlNode()
@@ -47,10 +44,10 @@ public class CXmlNode {
 	public final String GetContent()
 	{	return Content;	}
 	
-	public final Hashtable<String,String> GetAttributes()
+	public final Map<String,String> GetAttributes()
 	{	return Attribs;	}
 	
-	public final Hashtable<String,LinkedList<CXmlNode> > GetSubNodes()
+	public final Map<String,LinkedList<CXmlNode> > GetSubNodes()
 	{	return SubNodes;	}
 	
 	public final LinkedList<CXmlNode> GetSubNodes(String Name)
@@ -95,8 +92,8 @@ public class CXmlNode {
 	
 	public void ReCalc(int Size)
 	{
-		Hashtable<String,String> NewAttribs=new Hashtable<String,String>(Size==0 ? Attribs.size()+1 : Size);
-		Hashtable<String,LinkedList<CXmlNode> > NewSubNodes=new Hashtable<String,LinkedList<CXmlNode> >(Size==0 ? SubNodes.size()+1 : Size);
+		Map<String,String> NewAttribs=new HashMap<String,String>(Size==0 ? Attribs.size()+1 : Size,1);
+		Map<String,LinkedList<CXmlNode> > NewSubNodes=new HashMap<String,LinkedList<CXmlNode> >(Size==0 ? SubNodes.size()+1 : Size,1);
 		NewAttribs.putAll(Attribs);
 		NewSubNodes.putAll(SubNodes);
 		Attribs.clear();
@@ -105,13 +102,13 @@ public class CXmlNode {
 		SubNodes=null;
 		Attribs=NewAttribs;
 		SubNodes=NewSubNodes;
-		Enumeration<LinkedList<CXmlNode> > E=SubNodes.elements();
-		while(E.hasMoreElements())
+		Iterator<Map.Entry<String,LinkedList<CXmlNode>>> It=SubNodes.entrySet().iterator();
+		while(It.hasNext())
 		{
-			ListIterator<CXmlNode> It=E.nextElement().listIterator();
-			if(It.hasNext())
+			Iterator<CXmlNode> It2=It.next().getValue().listIterator();
+			if(It2.hasNext())
 			{
-				It.next().ReCalc(Size);
+				It2.next().ReCalc(Size);
 			}
 		}
 	}
@@ -121,8 +118,7 @@ public class CXmlNode {
 		String Ret=new String("<"+GetName());
 		if(Attribs.size()>0)
 		{
-			Set<Map.Entry<String, String> > AttribsList=Attribs.entrySet();
-			Iterator<Map.Entry<String,String>> It=AttribsList.iterator();
+			Iterator<Map.Entry<String,String>> It=Attribs.entrySet().iterator();
 			while(It.hasNext())
 			{
 				Map.Entry<String, String> Entry=It.next();
@@ -130,16 +126,17 @@ public class CXmlNode {
 			}
 		}
 		Ret+=">";
+		
 		if(SubNodes.size()>0)
 		{
 			Ret+=System.getProperty("line.separator");
-			Enumeration<LinkedList<CXmlNode> > Nodes=SubNodes.elements();
-			while(Nodes.hasMoreElements())
+			Iterator<Map.Entry<String,LinkedList<CXmlNode>>> It=SubNodes.entrySet().iterator();
+			while(It.hasNext())
 			{
-				ListIterator<CXmlNode> It=Nodes.nextElement().listIterator();
-				while(It.hasNext())
+				Iterator<CXmlNode> It2=It.next().getValue().listIterator();
+				while(It2.hasNext())
 				{
-					Ret+=It.next().toString();
+					Ret+=It2.next().toString();
 				}
 			}
 		}
@@ -150,13 +147,13 @@ public class CXmlNode {
 	
 	public void Clear()
 	{
-		Enumeration<LinkedList<CXmlNode> > Nodes=SubNodes.elements();
-		while(Nodes.hasMoreElements())
+		Iterator<Map.Entry<String,LinkedList<CXmlNode>>> It=SubNodes.entrySet().iterator();
+		while(It.hasNext())
 		{
-			ListIterator<CXmlNode> It=Nodes.nextElement().listIterator();
-			while(It.hasNext())
+			Iterator<CXmlNode> It2=It.next().getValue().listIterator();
+			while(It2.hasNext())
 			{
-				It.next().Clear();
+				It2.next().Clear();
 			}
 		}
 		
@@ -166,5 +163,10 @@ public class CXmlNode {
 		Attribs=null;
 		SubNodes.clear();
 		SubNodes=null;
+	}
+	
+	protected void finalize()
+	{
+		Clear();
 	}
 }

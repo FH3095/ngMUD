@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <config>
 	<comment>T</comment>
-	<packets>
+	<packets package="de.ngmud.network.packets">
 		<CPack_Chat>1</CPack_Chat>
 		<CSubPacket>0</CSubPacket>
 	</packets>
