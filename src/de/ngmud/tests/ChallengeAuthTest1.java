@@ -6,6 +6,18 @@ import de.ngmud.util.CRandom;
 
 public class ChallengeAuthTest1 extends TestBase {
 
+	/**
+	 * How ChallengeAuth works:
+	 * Server stores Hash1=Hash(Username+":"+PW) inside his database.
+	 * On Auth:
+	 * - User inputs Username and PW.
+	 * - Client calcs Hash1=Hash(Username+":"+PW).
+	 * - Server sends a random hash/string/whatever to the client.
+	 * - Client and server calcs ResultHash=Hash(Hash1+":"+RandomHash).
+	 * - Client sends ResultHash to the server.
+	 * - Server compares both hashes.
+	 * Thats the same way HTTP-Digest-Auth works.
+	 */
 	public void Main(String[] args) throws ngMUDException {
 		System.out.println("ChallengeAuthTest");
 		String Username="FH";
