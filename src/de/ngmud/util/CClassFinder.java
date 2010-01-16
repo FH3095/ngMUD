@@ -5,8 +5,8 @@ import java.util.*;
 import de.ngmud.CLog;
 
 
-public abstract class CHelper {
-	private CHelper() {}
+public abstract class CClassFinder {
+	private CClassFinder() {}
 	public static Class<?> FindClass(String Packet,String ClassName,boolean Instanceable)
 	{
 		Class<?> Ret=null;
