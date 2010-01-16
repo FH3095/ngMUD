@@ -2,8 +2,8 @@ package de.ngmud.util;
 
 import java.util.Random;
 
-public class CRandom<T> {
-	static Random Rand=null;
+public class CRandom {
+	private static Random Rand=null;
 
 	/**
 	 * Returns a Random-object and seeds it with System.nanoTime() when created.
@@ -70,13 +70,14 @@ public class CRandom<T> {
 	
 	/**
 	 * Returns a random int between Min(inclusive) and Max(inclusive).
+	 * This function only uses 31 bits of the integer.
 	 * @param Min
 	 * @param Max
 	 * @return Random int
 	 */
 	public static int Int(int Min,int Max)
 	{
-		return (R().nextInt()%((Max-Min)+1))+Min;
+		return (Math.abs(R().nextInt())%((Max-Min)+1))+Min;
 	}
 	
 	public static long Long()
@@ -86,7 +87,7 @@ public class CRandom<T> {
 	
 	public static long Long(long Min,long Max)
 	{
-		return (R().nextLong()%((Max-Min)+1))+Min;
+		return (Math.abs(R().nextLong())%((Max-Min)+1))+Min;
 	}
 
 	public static boolean Bool()
