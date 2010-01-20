@@ -4,12 +4,12 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import de.ngmud.CLog;
-import de.ngmud.util.CRandom;
 
 public class CChallengeAuthHelper {
 	private static CChallengeAuthHelper OnlyInstance=null;
-	private final String StdAlgo="SHA-256";
 	private MessageDigest DigestCalc;
+	public final String STD_ALGO="SHA-256";
+	public final int RND_BYTE_ARRAY_LEN=12;
 
 	private CChallengeAuthHelper()
 	{
@@ -34,7 +34,7 @@ public class CChallengeAuthHelper {
 	{
 		if(DigestAlgo=="")
 		{
-			DigestAlgo=StdAlgo;
+			DigestAlgo=STD_ALGO;
 		}
 
 		try {
@@ -45,31 +45,19 @@ public class CChallengeAuthHelper {
         	return false;
         }
         CLog.Debug("Using "+DigestCalc.getAlgorithm()+" which has "+DigestCalc.getDigestLength()+
-        		" Bits provided by "+DigestCalc.getProvider().getName()+".");
+        		" Bytes provided by "+DigestCalc.getProvider().getName()+".");
         return true;
 	}
 	
-	public byte[] GenerateRandomHash()
+	public byte[] GenerateHashFromPW(String PW)
 	{
-		byte Random[]=new byte[12];
-		CRandom.Bytes(Random);
-		DigestCalc.update(Random);
-		return DigestCalc.digest();
+		return DigestCalc.digest(PW.getBytes());
 	}
 	
-	public byte[] GenerateHashFromPW(String Username,String PW)
+	public byte[] GenerateResultHash(byte[] PWHash,byte[] Rnd)
 	{
-		String ToHash=Username+":"+PW;
-		DigestCalc.update(ToHash.getBytes());
-		return DigestCalc.digest();
-	}
-	
-	public byte[] GenerateHashFromHashes(byte[] Hash1,byte[] Hash2)
-	{
-		DigestCalc.update(Hash1);
-		DigestCalc.update(":".getBytes());
-		DigestCalc.update(Hash2);
-		return DigestCalc.digest();
+		DigestCalc.update(PWHash);
+		return DigestCalc.digest(Rnd);
 	}
 	
 	public String HashToString(byte[] Hash)
