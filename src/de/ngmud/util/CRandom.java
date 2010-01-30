@@ -102,7 +102,15 @@ public class CRandom {
 	
     public static StringBuffer RandomString(int MinLen, int MaxLen)
     {
-    	int Len=Int(MinLen,MaxLen);
+    	int Len;
+    	if(MinLen==MaxLen)
+    	{
+    		Len=MinLen;
+    	}
+    	else
+    	{
+    		Len=Int(MinLen,MaxLen);
+    	}
     	StringBuffer Ret = new StringBuffer(Len);
     	int What;
     	int Char='0';
@@ -133,7 +141,16 @@ public class CRandom {
     
     public static byte[] Bytes(int MinLen,int MaxLen)
     {
-    	byte[] Ret=new byte[Int(MinLen,MaxLen)];
+    	int Len;
+    	if(MinLen==MaxLen)
+    	{
+    		Len=MinLen;
+    	}
+    	else
+    	{
+    		Len=Int(MinLen,MaxLen);
+    	}
+    	byte[] Ret=new byte[Len];
     	Bytes(Ret);
     	return Ret;
     }

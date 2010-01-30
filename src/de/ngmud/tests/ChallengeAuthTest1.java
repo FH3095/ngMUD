@@ -2,6 +2,7 @@ package de.ngmud.tests;
 
 import de.ngmud.ngMUDException;
 import de.ngmud.network.CChallengeAuthHelper;
+import de.ngmud.util.CConvert;
 import de.ngmud.util.CRandom;
 
 public class ChallengeAuthTest1 extends TestBase {
@@ -27,11 +28,11 @@ public class ChallengeAuthTest1 extends TestBase {
 		byte Rnd[]=new byte[CChallengeAuthHelper.Instance().RND_BYTE_ARRAY_LEN];
 		CRandom.Bytes(Rnd);
 		byte ResultHash[]=CChallengeAuthHelper.Instance().GenerateResultHash(PWHash, Rnd);
-		System.out.println("Hash(PW)           ="+CChallengeAuthHelper.Instance().HashToString(PWHash));
-		System.out.println("Rnd                ="+CChallengeAuthHelper.Instance().HashToString(Rnd));
-		System.out.println("Hash(PW)+Rnd       ="+CChallengeAuthHelper.Instance().HashToString(PWHash)+"+"+
-				CChallengeAuthHelper.Instance().HashToString(Rnd));
-		System.out.println("Hash(Hash(PW)+Rnd) ="+CChallengeAuthHelper.Instance().HashToString(ResultHash));
+		System.out.println("Hash(PW)           ="+CConvert.HashToString(PWHash));
+		System.out.println("Rnd                ="+CConvert.HashToString(Rnd));
+		System.out.println("Hash(PW)+Rnd       ="+CConvert.HashToString(PWHash)+"+"+
+				CConvert.HashToString(Rnd));
+		System.out.println("Hash(Hash(PW)+Rnd) ="+CConvert.HashToString(ResultHash));
 		CChallengeAuthHelper.Instance().Delete();
 	}
 }
